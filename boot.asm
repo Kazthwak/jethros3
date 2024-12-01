@@ -32,12 +32,6 @@ align 4
 	;depth
 	dd 0
 
-;stack
-section .boostrap_stack
-stack_bottom:
-	times 16348 db 0; 16kB
-stack_top:
-
 ;page tables
 section .bss
 align 4096
@@ -51,11 +45,73 @@ resb 4096 ; 4KB page table
 section .multiboot.text
 global _start
 extern eax_boot
+extern kernel_entry
 _start:
 	mov [eax_boot-BEG_OFFSET], eax
 	;start the jank
-	;fill beggining of page directory
+	;fill beginning of page directory
+		;empty it
+		;mov eax, [page_directory - BEG_OFFSET]
+		;dir_clear:
+		;	cmp eax, (page_directory+4096 - BEG_OFFSET)
+		;	jge end_dir_clear
+		;	mov [0x0], long eax
+		;	;mov [eax], long 0x0
+		;	add eax, 0x4
+		;jmp dir_clear
+		;end_dir_clear:
+		;jmp $
+		;int 0
+		;page directory empty BUT WHAT IF NOT EMPTY. THEN MIGHT IT WORK?
+		;set the first element of it to be a pointer to the page table
+		mov eax, (page_table_kernel_1 - BEG_OFFSET)
+		or eax, 0b11
+		mov [page_directory - BEG_OFFSET], eax
+		;whichever Genius came up with the idea to mape the page table in twice, deserves a nobel prize
+		mov [page_directory - BEG_OFFSET + (768 * 4)], eax
+		;This has worked, right?
 	;fill first page table
+	mov eax, 0
+	;eax is the counter
+	mov ebx, (page_table_kernel_1 - BEG_OFFSET)
+	;ebx is the pointer to the element of the page table. (EAX and EBX could be amalgamated, but I cannot be bothered)
+		fill_first_table:
+		cmp eax, 1023
+		jg fill_first_table_end
+		;update the correct area of memory
+		mov ecx, eax
+		;multiply by 0x1000
+		shl ecx, 0xc
+		or ecx, 3
+		mov [ebx], ecx
+		;ebx now points to the next entry
+		add ebx, 4
+		;loop
+		inc eax
+		jmp fill_first_table
+	fill_first_table_end:
 	;enable paging
+	;set pointer to page directory
+	mov ecx, (page_directory-BEG_OFFSET)
+	mov cr3, ecx
+	;turn on paging
+	mov ecx, cr0
+	or ecx, 0x80010000
+	mov cr0, ecx
 	;jump to the kernel
-	;Do you think it will triple fault because no GDT
+	mov eax, finish_paging
+	jmp eax
+
+section .text
+
+extern stack_bottom
+extern stack_top
+finish_paging:
+	;remove the identity mapping thing
+	mov [page_directory], long 0x0
+	;force a reload of the paging structures
+	mov ecx, cr3
+	mov cr3, ecx
+	;setup the proper stack
+	mov esp, stack_top
+	jmp kernel_entry
