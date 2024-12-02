@@ -7,6 +7,7 @@
 #include "c/utils.c"
 #include "c/time.c"
 #include "c/text.c"
+#include "c/init.c"
 
 
 #include "c/debug.c"

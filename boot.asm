@@ -45,9 +45,11 @@ resb 4096 ; 4KB page table
 section .multiboot.text
 global _start
 extern eax_boot
+extern ebx_boot
 extern kernel_entry
 _start:
 	mov [eax_boot-BEG_OFFSET], eax
+	mov [ebx_boot-BEG_OFFSET], ebx
 	;start the jank
 	;fill beginning of page directory
 		;empty it
