@@ -1,14 +1,42 @@
 #ifndef HEADER_GUARD
 #define HEADER_GUARD
-//includes
+//--------includes
 #include <stdint.h>
 #include <stdbool.h>
+#include "c/font.h"
 
-//constants
+//--------constants
+//gdt
 #define gdt_len 5
+//for fixing janky pointers
 #define PAGING_OFFSET 0xc0000000
+//memory/paging
+#define page_size (0x400*0x4) //4096b (4kb)
+#define num_pages 0x100000 //number of 4kb pages in 4gb
+#define num_page_entries (num_pages/32)
+#define ONE_MB (0x400*0x400)
+#define FOUR_MB (0x4*ONE_MB)
+//text
+#define CHAR_WIDTH 8
+#define CHAR_HEIGHT 16
 
-//structs
+//--------externs
+extern uint32_t eax_boot;
+extern uint32_t ebx_boot;
+extern void* _kernel_start;
+extern void* _kernel_end;
+extern uint32_t page_directory_asm;
+extern void* page_table_kernel_1;
+extern void* page_table_kernel_2;
+
+extern void hang(void);
+extern void hang_int(void);
+void gdtr_load(void);
+void idtr_load(void);
+void gdt_load(void);
+extern void page_reload(void);
+
+//--------structs
 struct MultiBootInfoStruct{
 	uint32_t flags;
 	uint32_t mem_lower;
@@ -61,6 +89,7 @@ struct vbe_mode_info{
 	uint16_t window_b_segment;
 	uint32_t window_function_p;
 	uint16_t bytes_scanline;
+
 	uint16_t x_res;
 	uint16_t y_res;
 	uint8_t char_x;
@@ -163,15 +192,34 @@ struct tss_t{
     uint16_t   iomap;
 }__attribute__((packed));
 
-//global variables
+//--------global variables
+//gdt
 struct gdt_entry gdt[gdt_len];
 struct gdt_ptr gdtr;
 struct tss_t tss;
+//multiboot structs
 struct MultiBootInfoStruct stateinfo;
 struct vbe_mode_info vbe_info;
 struct vbe_control_info vbe_control_info;
+//graphics
+uint16_t x_res;
+uint16_t y_res;
+uint16_t x_char_res;
+uint16_t y_char_res;
+uint16_t cursor_x;
+uint16_t cursor_y;
+uint32_t* screen_address;
+volatile uint8_t framebuffer[768*0x400*4] __attribute__((aligned(4096)));
+//memory
+void* end_of_used_ram;
+void* beg_of_used_ram;
+uint32_t first_mem_hole;
+uint32_t phys_page_state[num_page_entries];
+uint32_t* page_directory = &page_directory_asm;
+void* page_tables[1024];
 
-//prototypes
+
+//--------prototypes
 void memset(uint32_t base, uint8_t val, uint32_t length);
 void memcpy(void* start, uint32_t length, void* dest);
 void kernel_init(void);
@@ -179,15 +227,18 @@ void main(void);
 void gdt_init(void);
 void gdt_set_entry(uint8_t entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity);
 void graphics_init(void);
-
-//externs
-extern uint32_t eax_boot;
-extern uint32_t ebx_boot;
-
-extern void hang(void);
-extern void hang_int(void);
-void gdtr_load(void);
-void idtr_load(void);
-void gdt_load(void);
+void mem_init(void);
+uint8_t init_page_valid(uint32_t mem_addr);
+void init_phys_pages(void);
+void* alloc_phys_page(uint32_t start_addr);
+uint32_t get_phys_address(uint32_t address);
+void map_page(uint32_t phys_addr, uint32_t virt_addr);
+void clear_screen(void);
+void putpixel(uint16_t x, uint16_t y, uint32_t colour);
+void draw_rect(uint16_t x, uint16_t y, uint16_t x_size, uint16_t y_size, uint32_t colour);
+void putcharxy(uint16_t x, uint16_t y, char character);
+void putcharxyc(uint16_t x, uint16_t y, char character);
+void newline();
+void putchar(char character);
 
 #endif

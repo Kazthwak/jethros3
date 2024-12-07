@@ -40,6 +40,12 @@ gdt_load:
 	mov ss, ax
 	ret
 
+global page_reload
+page_reload:
+	mov ecx, cr3
+	mov cr3, ecx
+	ret
+
 section .bss
 global stack_bottom
 global stack_top

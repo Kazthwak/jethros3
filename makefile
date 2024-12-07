@@ -17,7 +17,7 @@ boot.o: boot.asm
 	@nasm boot.asm -o boot.o -f elf32
 
 kernel.o: kernel.c kernel.h c/IO.c c/graphics.c c/gdt.c c/idt.c c/interrupts.c c/utils.c c/keyboard.c c/time.c c/debug.c \
-c/text.c c/init.c
+c/text.c c/init.c c/mem.c c/font.h
 	@~/opt/cross/bin/i686-elf-gcc -c kernel.c -o kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
 jethros.bin: kernel_asm.o boot.o kernel.o

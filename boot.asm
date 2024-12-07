@@ -35,11 +35,14 @@ align 4
 ;page tables
 section .bss
 align 4096
-global page_directory
-page_directory:
+global page_directory_asm
+page_directory_asm:
 resb 4096; 4KB page directory
 global page_table_kernel_1
 page_table_kernel_1:
+resb 4096 ; 4KB page table
+global page_table_kernel_2
+page_table_kernel_2:
 resb 4096 ; 4KB page table
 
 section .multiboot.text
@@ -68,9 +71,12 @@ _start:
 		;set the first element of it to be a pointer to the page table
 		mov eax, (page_table_kernel_1 - BEG_OFFSET)
 		or eax, 0b11
-		mov [page_directory - BEG_OFFSET], eax
+		mov [page_directory_asm - BEG_OFFSET], eax
 		;whichever Genius came up with the idea to mape the page table in twice, deserves a nobel prize
-		mov [page_directory - BEG_OFFSET + (768 * 4)], eax
+		mov [page_directory_asm - BEG_OFFSET + (768 * 4)], eax
+		mov eax, (page_table_kernel_2 - BEG_OFFSET)
+		or eax, 0b11
+		mov [page_directory_asm - BEG_OFFSET + (769 * 4)], eax
 		;This has worked, right?
 	;fill first page table
 	mov eax, 0
@@ -92,9 +98,28 @@ _start:
 		inc eax
 		jmp fill_first_table
 	fill_first_table_end:
+	mov eax, 1024
+	;eax is the counter
+	mov ebx, (page_table_kernel_2 - BEG_OFFSET)
+	;ebx is the pointer to the element of the page table. (EAX and EBX could be amalgamated, but I cannot be bothered)
+		fill_second_table:
+		cmp eax, 2047
+		jg fill_second_table_end
+		;update the correct area of memory
+		mov ecx, eax
+		;multiply by 0x1000
+		shl ecx, 0xc
+		or ecx, 3
+		mov [ebx], ecx
+		;ebx now points to the next entry
+		add ebx, 4
+		;loop
+		inc eax
+		jmp fill_second_table
+	fill_second_table_end:
 	;enable paging
 	;set pointer to page directory
-	mov ecx, (page_directory-BEG_OFFSET)
+	mov ecx, (page_directory_asm-BEG_OFFSET)
 	mov cr3, ecx
 	;turn on paging
 	mov ecx, cr0
@@ -110,7 +135,7 @@ extern stack_bottom
 extern stack_top
 finish_paging:
 	;remove the identity mapping thing
-	mov [page_directory], long 0x0
+	mov [page_directory_asm], long 0x0
 	;force a reload of the paging structures
 	mov ecx, cr3
 	mov cr3, ecx
