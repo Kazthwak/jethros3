@@ -20,7 +20,7 @@ vbe_control_info = *cinfo;
 mem_init();
 
 graphics_init();
-
+idt_init();
 main();
 hang();
 }

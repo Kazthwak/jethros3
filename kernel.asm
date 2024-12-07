@@ -22,11 +22,6 @@ gdtr_load:
 	lgdt[gdtr]
 	ret
 
-;global idtr_load
-;extern idtr
-;idtr_load:
-;	lidt[idtr]
-;	ret
 
 global gdt_load
 gdt_load:
@@ -42,9 +37,13 @@ gdt_load:
 
 global page_reload
 page_reload:
+	push ecx
 	mov ecx, cr3
 	mov cr3, ecx
+	pop ecx
 	ret
+
+%include "int.asm"
 
 section .bss
 global stack_bottom

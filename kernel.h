@@ -19,6 +19,8 @@
 //text
 #define CHAR_WIDTH 8
 #define CHAR_HEIGHT 16
+//idt
+#define idt_len 256
 
 //--------externs
 extern uint32_t eax_boot;
@@ -35,6 +37,40 @@ void gdtr_load(void);
 void idtr_load(void);
 void gdt_load(void);
 extern void page_reload(void);
+
+extern void isr0(void);
+extern void isr1(void);
+extern void isr2(void);
+extern void isr3(void);
+extern void isr4(void);
+extern void isr5(void);
+extern void isr6(void);
+extern void isr7(void);
+extern void isr8(void);
+extern void isr9(void);
+extern void isr10(void);
+extern void isr11(void);
+extern void isr12(void);
+extern void isr13(void);
+extern void isr14(void);
+extern void isr15(void);
+extern void isr16(void);
+extern void isr17(void);
+extern void isr18(void);
+extern void isr19(void);
+extern void isr20(void);
+extern void isr21(void);
+extern void isr22(void);
+extern void isr23(void);
+extern void isr24(void);
+extern void isr25(void);
+extern void isr26(void);
+extern void isr27(void);
+extern void isr28(void);
+extern void isr29(void);
+extern void isr30(void);
+extern void isr31(void);
+
 
 //--------structs
 struct MultiBootInfoStruct{
@@ -192,6 +228,27 @@ struct tss_t{
     uint16_t   iomap;
 }__attribute__((packed));
 
+struct idt_entry{
+uint16_t addr_low;
+uint16_t gdt_selector;
+uint8_t reserved;
+uint8_t flags;
+uint16_t addr_high;
+}__attribute__((packed));
+
+struct idt_ptr{
+uint16_t len;
+uint32_t base;
+}__attribute__((packed));
+
+struct regs{
+    volatile uint32_t gs, fs, es, ds;      /* pushed the segs last */
+    volatile uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;  /* pushed by 'pusha' */
+    volatile uint32_t int_no, err_code;    /* our 'push byte #' and ecodes do this */
+    volatile uint32_t eip, cs, eflags, useresp, ss;   /* pushed by the processor automatically */ 
+}__attribute__((packed));
+
+
 //--------global variables
 //gdt
 struct gdt_entry gdt[gdt_len];
@@ -217,6 +274,9 @@ uint32_t first_mem_hole;
 uint32_t phys_page_state[num_page_entries];
 uint32_t* page_directory = &page_directory_asm;
 void* page_tables[1024];
+//idt
+struct idt_ptr idtr;
+struct idt_entry idt_table[idt_len];
 
 
 //--------prototypes
@@ -240,5 +300,9 @@ void putcharxy(uint16_t x, uint16_t y, char character);
 void putcharxyc(uint16_t x, uint16_t y, char character);
 void newline();
 void putchar(char character);
+void print_string(char* string);
+void idt_init(void);
+void set_idt_entry(uint8_t entry, uint32_t addr, uint16_t gdt_selector, uint8_t flags);
+void fault_handler(struct regs* r);
 
 #endif

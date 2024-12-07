@@ -17,4 +17,9 @@ void newline(){
 	cursor_x = 0;
 }
 
-void print_string()
+void print_string(char* string){
+	while(*string != 0){
+		putchar(*string);
+		string++;
+	}
+}
