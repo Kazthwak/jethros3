@@ -23,3 +23,31 @@ void print_string(char* string){
 		string++;
 	}
 }
+
+void hexdig(uint8_t num){
+	uint8_t tmp = 0x30; //('0')
+	if(num >= 0xa){
+		tmp = 'A'-0xa;
+	}
+	putchar(tmp+num);
+}
+
+void hexbyte(uint8_t num){
+	hexdig(num>>4);
+	hexdig(num&0xf);
+}
+
+void hexword(uint16_t num){
+	hexbyte(num>>8);
+	hexbyte(num&0xff);
+}
+
+void hexdword(uint32_t num){
+	hexword(num>>16);
+	hexword(num&0xffff);
+}
+
+void hexqword(uint64_t num){
+	hexdword(num>>32);
+	hexdword(num&0xffffffff);
+}

@@ -304,5 +304,10 @@ void print_string(char* string);
 void idt_init(void);
 void set_idt_entry(uint8_t entry, uint32_t addr, uint16_t gdt_selector, uint8_t flags);
 void fault_handler(struct regs* r);
+void hexdig(uint8_t num);
+void hexbyte(uint8_t num);
+void hexword(uint16_t num);
+void hexdword(uint32_t num);
+void hexqword(uint64_t num);
 
 #endif
