@@ -43,6 +43,16 @@ page_reload:
 	pop ecx
 	ret
 
+global inton
+inton:
+	sti
+	ret
+
+global testing
+testing:
+	int 0x20
+	ret
+
 %include "int.asm"
 
 section .bss

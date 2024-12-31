@@ -13,13 +13,14 @@ void mem_init(){
 	beg_of_used_ram = (void*)(((uint32_t)&_kernel_start)+PAGING_OFFSET);
 	uint32_t max_mem = stateinfo.mem_upper;
 	max_mem *= 1024; //now contains the size of upper memory in bytes
-	max_mem += 1024*1024; //Now adjusted for the ignored first MB of memory
+	max_mem += ONE_MB; //Now adjusted for the ignored first MB of memory
 	first_mem_hole = max_mem;
 	for(uint16_t i= 0; i < 1024; i++){
 		page_tables[i] = 0;
 	}
 	page_tables[768] = &page_table_kernel_1;
 	page_tables[769] = &page_table_kernel_2;
+	page_tables[770] = &page_table_kernel_3;
 	init_phys_pages();
 }
 

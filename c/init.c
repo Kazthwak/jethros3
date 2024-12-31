@@ -20,7 +20,23 @@ vbe_control_info = *cinfo;
 mem_init();
 
 graphics_init();
+print_string("GDT, Paging and graphics initialised\n");
 idt_init();
+print_string("IDT initialised\n");
+irq_init();
+print_string("IRQs INITIALISED\n");
+//timer init
+//keyboard init
+disc_init();
+print_string("Disc controller initialised\n");
+time_init();
+print_string("Timer Initialised\n");
+keyboard_init();
+print_string("Keyboard initialised\n");
+clear_screen();
+print_string("Booted succesfully\nWelcome to ");
+print_string(version);
+print_string("\n");
 main();
 hang();
 }

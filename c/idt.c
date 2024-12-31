@@ -1,7 +1,7 @@
 #include "../kernel.h"
 
 void idt_init(){
-	set_idt_entry(0, (uint32_t)isr0, 0x08, 0xee);
+	set_idt_entry(0, (uint32_t)isr0, 0x08, 0x8e);
 	set_idt_entry(1, (uint32_t)isr1, 0x08, 0x8e);
 	set_idt_entry(2, (uint32_t)isr2, 0x08, 0x8e);
 	set_idt_entry(3, (uint32_t)isr3, 0x08, 0x8e);

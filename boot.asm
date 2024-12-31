@@ -44,6 +44,9 @@ resb 4096 ; 4KB page table
 global page_table_kernel_2
 page_table_kernel_2:
 resb 4096 ; 4KB page table
+global page_table_kernel_3
+page_table_kernel_3:
+resb 4096 ; 4KB page table
 
 section .multiboot.text
 global _start
@@ -74,9 +77,14 @@ _start:
 		mov [page_directory_asm - BEG_OFFSET], eax
 		;whichever Genius came up with the idea to mape the page table in twice, deserves a nobel prize
 		mov [page_directory_asm - BEG_OFFSET + (768 * 4)], eax
+		;the second page table
 		mov eax, (page_table_kernel_2 - BEG_OFFSET)
 		or eax, 0b11
 		mov [page_directory_asm - BEG_OFFSET + (769 * 4)], eax
+		;the third page table
+		mov eax, (page_table_kernel_3 - BEG_OFFSET)
+		or eax, 0b11
+		mov [page_directory_asm - BEG_OFFSET + (770 * 4)], eax
 		;This has worked, right?
 	;fill first page table
 	mov eax, 0
@@ -117,6 +125,25 @@ _start:
 		inc eax
 		jmp fill_second_table
 	fill_second_table_end:
+	mov eax, 2048
+	;eax is the counter
+	mov ebx, (page_table_kernel_3 - BEG_OFFSET)
+	;ebx is the pointer to the element of the page table. (EAX and EBX could be amalgamated, but I cannot be bothered)
+		fill_third_table:
+		cmp eax, 3071
+		jg fill_third_table_end
+		;update the correct area of memory
+		mov ecx, eax
+		;multiply by 0x1000
+		shl ecx, 0xc
+		or ecx, 3
+		mov [ebx], ecx
+		;ebx now points to the next entry
+		add ebx, 4
+		;loop
+		inc eax
+		jmp fill_third_table
+	fill_third_table_end:
 	;enable paging
 	;set pointer to page directory
 	mov ecx, (page_directory_asm-BEG_OFFSET)

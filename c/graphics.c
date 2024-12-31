@@ -21,6 +21,8 @@ void graphics_init(){
 
 void clear_screen(){
 	memset((uint32_t)&framebuffer, 0x0, sizeof(framebuffer));
+	cursor_x = 0;
+	cursor_y = 0;
 }
 
 void putpixel(uint16_t x, uint16_t y, uint32_t colour){

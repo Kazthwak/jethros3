@@ -51,3 +51,10 @@ void hexqword(uint64_t num){
 	hexdword(num>>32);
 	hexdword(num&0xffffffff);
 }
+
+void binbyte(uint8_t num){
+	//very janky loop. when it underflows, condition will be false
+	for(uint8_t i = 7; i <= 7; i--){
+		putchar(0x30+((num>>i)&1));
+	}
+}

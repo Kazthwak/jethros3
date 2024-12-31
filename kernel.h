@@ -1,9 +1,11 @@
 #ifndef HEADER_GUARD
 #define HEADER_GUARD
+#define version "JETHROS3 Version 0.5"
 //--------includes
 #include <stdint.h>
 #include <stdbool.h>
 #include "c/font.h"
+#include "c/scancodes.h"
 
 //--------constants
 //gdt
@@ -21,6 +23,13 @@
 #define CHAR_HEIGHT 16
 //idt
 #define idt_len 256
+//disc
+#define master_drive 0xE0
+#define slave_drive  0xF0
+//timer
+#define TIMER_FREQUENCY 41
+//keyboard
+#define KEY_BUFFER_LENGTH 1024
 
 //--------externs
 extern uint32_t eax_boot;
@@ -30,6 +39,7 @@ extern void* _kernel_end;
 extern uint32_t page_directory_asm;
 extern void* page_table_kernel_1;
 extern void* page_table_kernel_2;
+extern void* page_table_kernel_3;
 
 extern void hang(void);
 extern void hang_int(void);
@@ -37,6 +47,8 @@ void gdtr_load(void);
 void idtr_load(void);
 void gdt_load(void);
 extern void page_reload(void);
+extern void inton(void);
+extern void testing(void);
 
 extern void isr0(void);
 extern void isr1(void);
@@ -70,6 +82,23 @@ extern void isr28(void);
 extern void isr29(void);
 extern void isr30(void);
 extern void isr31(void);
+
+extern void irq0(void);
+extern void irq1(void);
+extern void irq2(void);
+extern void irq3(void);
+extern void irq4(void);
+extern void irq5(void);
+extern void irq6(void);
+extern void irq7(void);
+extern void irq8(void);
+extern void irq9(void);
+extern void irq10(void);
+extern void irq11(void);
+extern void irq12(void);
+extern void irq13(void);
+extern void irq14(void);
+extern void irq15(void);
 
 
 //--------structs
@@ -248,6 +277,14 @@ struct regs{
     volatile uint32_t eip, cs, eflags, useresp, ss;   /* pushed by the processor automatically */ 
 }__attribute__((packed));
 
+struct disc_sector{
+	uint8_t data[512];
+}__attribute__((packed));
+
+struct keypress_data{
+bool pressed;
+uint8_t code;
+}__attribute__((packed));
 
 //--------global variables
 //gdt
@@ -277,6 +314,13 @@ void* page_tables[1024];
 //idt
 struct idt_ptr idtr;
 struct idt_entry idt_table[idt_len];
+void* irq_handle_functions[16];
+//timer
+volatile uint64_t time = 0;
+//keyboard
+volatile struct keypress_data key_buffer[KEY_BUFFER_LENGTH];
+volatile uint16_t key_buffer_pointer_bottom;
+volatile uint16_t key_buffer_pointer_top;
 
 
 //--------prototypes
@@ -298,7 +342,7 @@ void putpixel(uint16_t x, uint16_t y, uint32_t colour);
 void draw_rect(uint16_t x, uint16_t y, uint16_t x_size, uint16_t y_size, uint32_t colour);
 void putcharxy(uint16_t x, uint16_t y, char character);
 void putcharxyc(uint16_t x, uint16_t y, char character);
-void newline();
+void newline(void);
 void putchar(char character);
 void print_string(char* string);
 void idt_init(void);
@@ -309,5 +353,34 @@ void hexbyte(uint8_t num);
 void hexword(uint16_t num);
 void hexdword(uint32_t num);
 void hexqword(uint64_t num);
+void disc_init(void);
+bool disk_poll(void);
+bool disk_read(volatile struct disc_sector* sector_address, uint32_t LBA);
+void wordout(uint32_t port, uint16_t data);
+uint16_t wordin(uint32_t port);
+void byteout(uint32_t port, uint8_t data);
+uint8_t bytein(uint16_t port);
+void Qshutdown(void);
+void irq_init(void);
+void irq_handler(struct regs *r);
+void pic_remap(void);
+void IRQ_set_mask(unsigned char IRQline);
+void IRQ_clear_mask(unsigned char IRQline);
+void set_irq_handler(uint8_t num, void* function);
+void clear_irq_handler(uint8_t num);
+void time_init(void);
+void set_timer_phase(int hz);
+void timer_handle(struct regs* r);
+uint64_t get_time_seconds(void);
+void block_wait_secs(uint64_t ticks);
+void block_wait_ticks(uint64_t ticks);
+void keyboard_init(void);
+void keyboard_handle(struct regs* r);
+void block_wait_keyboard_read(void);
+void block_wait_keyboard_write(void);
+void binbyte(uint8_t num);
+bool is_key_waiting(void);
+struct keypress_data get_keypress(void);
+void clear_keyboard_buffer(void);
 
 #endif

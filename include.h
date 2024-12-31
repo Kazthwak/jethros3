@@ -9,5 +9,6 @@
 #include "c/text.c"
 #include "c/init.c"
 #include "c/mem.c"
+#include "c/disc.c"
 
 #include "c/debug.c"

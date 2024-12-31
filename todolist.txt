@@ -1,3 +1,5 @@
-gdt
-graphics
-idt
+proper keyboard scancodes
+program loading
+interrupt for user I/O
+usermode
+security
