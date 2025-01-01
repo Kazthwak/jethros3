@@ -21,6 +21,8 @@
 #define num_page_entries (num_pages/32)
 #define ONE_MB (0x400*0x400)
 #define FOUR_MB (0x4*ONE_MB)
+//memory allocation
+#define SLAB_SIZE (64*ONE_MB)
 //text
 #define CHAR_WIDTH 8
 #define CHAR_HEIGHT 16
@@ -289,6 +291,12 @@ bool pressed;
 uint8_t code;
 }__attribute__((packed));
 
+struct free_mem_link{
+	uint32_t next_free_pointer;
+	uint32_t length;
+}__attribute__((packed));
+
+
 //--------global variables
 //gdt
 struct gdt_entry gdt[gdt_len];
@@ -314,6 +322,10 @@ uint32_t first_mem_hole;
 uint32_t phys_page_state[num_page_entries];
 uint32_t* page_directory = &page_directory_asm;
 void* page_tables[1024];
+//memory allocation
+uint32_t slab_start;
+uint32_t slab_end;
+uint32_t first_free_slab;
 //idt
 struct idt_ptr idtr;
 struct idt_entry idt_table[idt_len];

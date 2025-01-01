@@ -14,6 +14,7 @@ void fault_handler(struct regs* r){
 				if(res){
 					return;
 				}
+				print_string("ERROR, INSUFFICIENT MEMORY");
 			}
 		}
 	}

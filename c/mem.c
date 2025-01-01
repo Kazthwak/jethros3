@@ -40,6 +40,9 @@ void init_mem_late(){
 		page_tables[i] = page_table;
 		page_directory[i] = (uint32_t)page_table | 3;
 	}
+	slab_start = kmalloc_permanant(SLAB_SIZE);
+	slab_end = slab_start+SLAB_SIZE-1;
+	first_free_slab = slab_start;
 }
 
 //pages on the boundaries of usability may be flagged as unusable when they are usable (off by one error)
@@ -173,11 +176,7 @@ bool alloc_and_map_page(uint32_t virt_addr){
 //I can use a heap to allocate small structures that will be de-allocated
 //i will also need a function to allocate the next page, which will waste up to 4096B of memory. I see now why a more
 //intelligent memory manager is so useful (there is a bug that that means it can waste 4KB rather than 4KB-1)
-//todo
-//wirk out which pages are crossed by the allocation
-//allocate those which are de-allocated
-//instead, I will make a page fault allocate the memory
-//profit?
+
 
 //returns a pointer to the next {length} bytes after the last used piece of kernel memory
 uint32_t kmalloc_permanant(uint32_t length){
@@ -196,3 +195,15 @@ uint32_t kmalloc_permanant_page(){
 	next_free_kernel_mem = start+page_size;
 	return(start);
 }
+
+//heap work:
+//some large un-deallocateable section of memory. extendable?
+//maybe 32MB - use a define to make it easy to change
+//keep the whole thing lazy loaded at all times
+
+//slab alloc - find the first element of the linked list with length greater than LENGTH+4, shorten the length of the list
+//(possibly removing it), and return a pointer to the last LENGTH bytes of that section of memory. Put a uint32_t before
+//the memory recording its length (including itself)
+//if no memory is available, attempt to amalgamate neighbouring sections of the slab
+//slab free - decrement the pointer by 4, and then read length (including the uint32_t before the alloced memory)
+//add a link in the list there (keeping it sorted)
