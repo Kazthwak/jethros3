@@ -1,7 +1,5 @@
 #include "../kernel.h"
 
-//TODO - KEYBOARD STUFF
-
 #define BAD_KEYBOARD
 
 void keyboard_handle(__attribute__((unused)) struct regs* r){

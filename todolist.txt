@@ -1,5 +1,7 @@
 proper keyboard scancodes
+virtual memory manager
+filesystem support
 program loading
-interrupt for user I/O
+system calls
 usermode
 security

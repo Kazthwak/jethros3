@@ -22,6 +22,24 @@ void mem_init(){
 	page_tables[769] = &page_table_kernel_2;
 	page_tables[770] = &page_table_kernel_3;
 	init_phys_pages();
+	next_free_kernel_mem = (uint32_t)end_of_used_ram;
+	//align it to the next page boundary
+	next_free_kernel_mem >>= 12;
+	next_free_kernel_mem++;
+	next_free_kernel_mem <<= 12;
+}
+
+void init_mem_late(){
+	//create new page tables
+	for(uint16_t i = 771; i < 1024; i++){
+		//allocate a page table
+		uint32_t* page_table = (uint32_t*)kmalloc_permanant_page();
+		//fill with 0
+		memset((uint32_t)page_table, 0x0, page_size);
+		//put it in the page directory and the page table list
+		page_tables[i] = page_table;
+		page_directory[i] = (uint32_t)page_table | 3;
+	}
 }
 
 //pages on the boundaries of usability may be flagged as unusable when they are usable (off by one error)
@@ -122,5 +140,59 @@ void map_page(uint32_t phys_addr, uint32_t virt_addr){
 	//next 10 most significant bits
 	table_entry = (virt_addr>>12)&0b1111111111;
 	uint32_t* page_table = (uint32_t*)page_tables[dir_entry];
+	//check if no page table present
+	if(page_table == 0){
+		print_string("No page table present for this virtual address.\n");
+		hang();
+	}
 	page_table[table_entry] = phys_addr | 0b11;
+}
+
+bool alloc_and_map_page(uint32_t virt_addr){
+	uint32_t phys_addr = (uint32_t)alloc_phys_page(0x0);
+	if(phys_addr == 0xffffffff){
+		return(false);
+	}
+	map_page(phys_addr, virt_addr);
+	return(true);	
+}
+
+//virtual address space todos
+//virtual address kernel memory manager
+//load programs by mapping pages and putting program in
+//leave the rest below 2gb as unmapped pages and handle page "faults"
+//swap out programs by changing the page directory. leave program page tables in kernel memory, and keep
+//pointers to the first 2-3gb (decide)
+
+//kernel virtual manager functions
+
+//this, could be tricky
+//I need to maintain a map of memory, but in a granularity of 1 byte
+//I could use a linked list, but that would necessitate random pages being mapped
+//I think a better solution (for now) is to allocate memory that cannot be de-allocated
+//I can use a heap to allocate small structures that will be de-allocated
+//i will also need a function to allocate the next page, which will waste up to 4096B of memory. I see now why a more
+//intelligent memory manager is so useful (there is a bug that that means it can waste 4KB rather than 4KB-1)
+//todo
+//wirk out which pages are crossed by the allocation
+//allocate those which are de-allocated
+//instead, I will make a page fault allocate the memory
+//profit?
+
+//returns a pointer to the next {length} bytes after the last used piece of kernel memory
+uint32_t kmalloc_permanant(uint32_t length){
+	uint32_t start = next_free_kernel_mem;
+	uint32_t end = start+length-1; //last used byte
+	next_free_kernel_mem = end+1; //first byte after, the next free byte
+	return(start);
+}
+
+uint32_t kmalloc_permanant_page(){
+	uint32_t start = next_free_kernel_mem;
+	start >>= 12;
+	start++;
+	start <<=12;
+	//start now points to the next page aligned value;
+	next_free_kernel_mem = start+page_size;
+	return(start);
 }

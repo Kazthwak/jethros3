@@ -1,6 +1,22 @@
 #include "../kernel.h"
 
 void fault_handler(struct regs* r){
+	//page fault
+	if(r->int_no == 0x0e){
+		//was a page not present fault
+		if((r->err_code&1) == 0){
+			//was not in user mode
+			if(((r->err_code>>2)&1) == 0){
+				uint32_t address;
+				asm volatile("mov %%cr2, %%eax" : "=a" (address):);
+				address &= 0xfffff000;
+				bool res = alloc_and_map_page(address);
+				if(res){
+					return;
+				}
+			}
+		}
+	}
 	print_string("\n\nException number ");
 	hexdword(r->int_no);
 	print_string(" fired\n");

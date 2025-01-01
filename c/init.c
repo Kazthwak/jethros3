@@ -29,10 +29,16 @@ print_string("IRQs INITIALISED\n");
 //keyboard init
 disc_init();
 print_string("Disc controller initialised\n");
+init_mem_late();
+print_string("Finished memory initialisation\n");
 time_init();
 print_string("Timer Initialised\n");
 keyboard_init();
 print_string("Keyboard initialised\n");
+print_string("\nBoot completed. Press any key to continue.");
+clear_keyboard_buffer();
+while(!is_key_waiting());
+clear_keyboard_buffer();
 clear_screen();
 print_string("Booted succesfully\nWelcome to ");
 print_string(version);

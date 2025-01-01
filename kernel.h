@@ -7,6 +7,9 @@
 #include "c/font.h"
 #include "c/scancodes.h"
 
+//--------janks
+#define dump_obj(obj_name) dump_mem((uint32_t)&obj_name, sizeof(obj_name));
+
 //--------constants
 //gdt
 #define gdt_len 5
@@ -321,6 +324,7 @@ volatile uint64_t time = 0;
 volatile struct keypress_data key_buffer[KEY_BUFFER_LENGTH];
 volatile uint16_t key_buffer_pointer_bottom;
 volatile uint16_t key_buffer_pointer_top;
+uint32_t next_free_kernel_mem;
 
 
 //--------prototypes
@@ -353,6 +357,7 @@ void hexbyte(uint8_t num);
 void hexword(uint16_t num);
 void hexdword(uint32_t num);
 void hexqword(uint64_t num);
+void binbyte(uint8_t num);
 void disc_init(void);
 bool disk_poll(void);
 bool disk_read(volatile struct disc_sector* sector_address, uint32_t LBA);
@@ -378,9 +383,13 @@ void keyboard_init(void);
 void keyboard_handle(struct regs* r);
 void block_wait_keyboard_read(void);
 void block_wait_keyboard_write(void);
-void binbyte(uint8_t num);
 bool is_key_waiting(void);
 struct keypress_data get_keypress(void);
 void clear_keyboard_buffer(void);
+uint32_t kmalloc_permanant(uint32_t length);
+bool alloc_and_map_page(uint32_t virt_addr);
+uint32_t kmalloc_permanant_page(void);
+void init_mem_late(void);
+void dump_mem(uint32_t start, uint32_t length);
 
 #endif

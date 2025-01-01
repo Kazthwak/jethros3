@@ -47,6 +47,7 @@ resb 4096 ; 4KB page table
 global page_table_kernel_3
 page_table_kernel_3:
 resb 4096 ; 4KB page table
+;3 page tables done here, 768, 769 and 770
 
 section .multiboot.text
 global _start
