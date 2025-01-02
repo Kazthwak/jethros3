@@ -403,5 +403,7 @@ bool alloc_and_map_page(uint32_t virt_addr);
 uint32_t kmalloc_permanant_page(void);
 void init_mem_late(void);
 void dump_mem(uint32_t start, uint32_t length);
+uint32_t kmalloc_slab(uint32_t length);
+void kfree_slab(uint32_t memory);
 
 #endif

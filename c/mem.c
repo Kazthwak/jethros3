@@ -38,11 +38,14 @@ void init_mem_late(){
 		memset((uint32_t)page_table, 0x0, page_size);
 		//put it in the page directory and the page table list
 		page_tables[i] = page_table;
-		page_directory[i] = (uint32_t)page_table | 3;
+		page_directory[i] = get_phys_address((uint32_t)page_table) | 3;
 	}
 	slab_start = kmalloc_permanant(SLAB_SIZE);
-	slab_end = slab_start+SLAB_SIZE-1;
+	slab_end = slab_start+SLAB_SIZE;
 	first_free_slab = slab_start;
+	struct free_mem_link* first_slab_link = (struct free_mem_link*)slab_start;
+	first_slab_link->length = SLAB_SIZE;
+	first_slab_link->next_free_pointer = 0x00000000;
 }
 
 //pages on the boundaries of usability may be flagged as unusable when they are usable (off by one error)
@@ -152,6 +155,9 @@ void map_page(uint32_t phys_addr, uint32_t virt_addr){
 }
 
 bool alloc_and_map_page(uint32_t virt_addr){
+	if(get_phys_address(virt_addr) != 0xffffffff){
+		return(true);
+	}
 	uint32_t phys_addr = (uint32_t)alloc_phys_page(0x0);
 	if(phys_addr == 0xffffffff){
 		return(false);
@@ -188,9 +194,11 @@ uint32_t kmalloc_permanant(uint32_t length){
 
 uint32_t kmalloc_permanant_page(){
 	uint32_t start = next_free_kernel_mem;
+	if(start != (start&0xfffff000)){
 	start >>= 12;
 	start++;
 	start <<=12;
+	}
 	//start now points to the next page aligned value;
 	next_free_kernel_mem = start+page_size;
 	return(start);
@@ -207,3 +215,91 @@ uint32_t kmalloc_permanant_page(){
 //if no memory is available, attempt to amalgamate neighbouring sections of the slab
 //slab free - decrement the pointer by 4, and then read length (including the uint32_t before the alloced memory)
 //add a link in the list there (keeping it sorted)
+
+//for allocating smaller amounts of memory
+uint32_t kmalloc_slab(uint32_t length){
+	length +=4;
+	uint32_t prev_pointer = 0x0;
+	uint32_t cur_pointer = first_free_slab;
+	while(true){
+		struct free_mem_link* link = (struct free_mem_link*)cur_pointer;
+		if(link->length >= length){break;}
+		prev_pointer = cur_pointer;
+		cur_pointer = link->next_free_pointer;
+		if(cur_pointer == 0x0){
+			//dans the future, this should defragment the list, then call itself recursively, somehow making sure it
+			//doesn't loop infinitely?
+			return(0x0);
+		}
+	}
+	struct free_mem_link* link = (struct free_mem_link*)cur_pointer;
+	uint32_t final_address = 0x0;
+	if((link->length)-length > 8){
+		//big enough to shorten, but leave in place
+		final_address = cur_pointer+(link->length)-length;
+		link->length -=length;
+	}
+	else{
+		//too small to shorten
+		//allocate more memory (the size of the block)
+		length = link->length;
+		final_address = cur_pointer;
+		//tremendous jank to make up for the changing of the previous link (check if 0 to update initial pointer)
+		if(prev_pointer == 0x0){
+			first_free_slab = link->next_free_pointer;
+		}
+		else{
+			//update the previous link
+			struct free_mem_link* prev_link = (struct free_mem_link*)prev_pointer;
+			prev_link->next_free_pointer = link->next_free_pointer;
+		}
+	}
+	//first_free_slab pointer. find the last (updated) length bytes, put a length at the begining, then return it+4
+	if(final_address == 0){
+		print_string("Slab allocation has reached an invalid state with no memory to return (with no error condition)");
+		hang();
+	}
+	uint32_t* length_free_pointer = (uint32_t*)final_address;
+	*length_free_pointer = length;
+	return(final_address+4);
+}
+
+void kfree_slab(uint32_t memory){
+	uint32_t address = memory-4;
+	uint32_t length = *(uint32_t*) address;
+	if(address+length > slab_end){
+		print_string("MEMORY EXCEEDS END OF SLAB");
+		hang();
+	}
+	if(address < slab_start){
+		print_string("MEMORY EXCEEDS BEGINNING OF SLAB");
+		hang();
+	}
+	struct free_mem_link* new_link = (struct free_mem_link*)address;
+	new_link->length = length;
+	//step through linked list
+	
+	struct free_mem_link* prev_link = 0x0;
+	struct free_mem_link* cur_link = (struct free_mem_link*)first_free_slab;
+	
+	while(true){
+		//current link is after the one trying to be freed
+		if(cur_link > new_link){
+			break;
+		}
+		//update the previous link
+		prev_link = cur_link;
+		//step through the linked list;
+		if((cur_link->next_free_pointer) == 0x0){
+			//jank. This means that we have reached the last link, so this link is the one to use
+			cur_link->next_free_pointer = (uint32_t)new_link;
+			new_link->next_free_pointer = 0x0;
+			return;
+		}
+		cur_link = (struct free_mem_link*)cur_link->next_free_pointer;
+	}
+	//change the previous link to point to this new one
+	prev_link->next_free_pointer = (uint32_t)new_link;
+	//update the new link to point to the next link
+	new_link->next_free_pointer = (uint32_t)cur_link;
+}

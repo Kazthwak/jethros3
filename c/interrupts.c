@@ -7,11 +7,24 @@ void fault_handler(struct regs* r){
 		if((r->err_code&1) == 0){
 			//was not in user mode
 			if(((r->err_code>>2)&1) == 0){
+				newline();
 				uint32_t address;
 				asm volatile("mov %%cr2, %%eax" : "=a" (address):);
-				address &= 0xfffff000;
-				bool res = alloc_and_map_page(address);
+				uint32_t page_address = address&0xfffff000;
+				//check if address is near a boandary. I am checking an excessive amount to avoid errors
+				bool extra_page_needed = ((address+0x11)&0xfffff000) > page_address;
+				//check if page already mapped
+				uint32_t next_page_address = (((page_address>>12)+1)<<12);
+				extra_page_needed &= (get_phys_address(next_page_address) == 0xffffffff);
+				bool res = alloc_and_map_page(page_address);
+				if(extra_page_needed){
+					res &= alloc_and_map_page(next_page_address);
+				}
 				if(res){
+					if(get_phys_address(address) == 0xffffffff){
+						print_string("MAPPING FAILED");
+						hang();
+					}
 					return;
 				}
 				print_string("ERROR, INSUFFICIENT MEMORY");
