@@ -1,6 +1,7 @@
 # JETHROS3
-They say "third time's the charm"...
-This will be a 32-bit higher-half kernel.
-I decided it would be easier to restart rather than trying to rearrange my old OS. It will also make the OS cleaner, I am sure.
-It *should* be easy as well, after all, I have done it before. Absolutely *no* chance this will end up being really difficult.
-I am also kind of hoping that I can avoid copy-pasting completely this time (although it was not very much last time). Time will tell.
+After version 2 reached an unsustainable quantity of technical debt, I have once again restarted completely (and reached a farther
+point in far less time) <br/>
+This OS is a higher half kernel, with basic memory management <br/>
+My hope is that in the not-too-distant future, I will add proper FAT support (as opposed to the basic driver that can almost find the
+location of files), and then usermode and proper program loading. Then will come multithreading, which will be an interesting challenge,
+that I am both dreading and looking forward to. (Although the chances are that will be in version 4).
