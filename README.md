@@ -1,5 +1,5 @@
 # JETHROS3
-After version 2 reached an unsustainable quantity of technical debt, I have once again restarted completely (and reached a farther
+After version 2 reached an unsustainable quantity of technical debt, I have once again restarted completely (and reached a further
 point in far less time) <br/>
 This OS is a higher half kernel, with basic memory management <br/>
 My hope is that in the not-too-distant future, I will add proper FAT support (as opposed to the basic driver that can almost find the
