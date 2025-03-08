@@ -2,9 +2,15 @@
 
 default: run
 
-run: jethros.iso
+run: jethros.iso hard_drive
 	@rm serial.log -f
-	@qemu-system-x86_64 -drive format=raw,file=jethros.iso,media=disk -serial file:serial.log -m 2G
+	@qemu-system-x86_64 -drive format=raw,file=jethros.iso,media=disk -drive format=raw,file=hard_drive,media=disk \
+	-serial file:serial.log -m 1G -boot menu=off
+
+hard_drive: disc/*
+	@rm hard_drive
+	@cp blank_disc hard_drive
+	@mcopy disc/* A:
 
 jethros.iso: jethros.bin
 	@cp jethros.bin ./isodir/boot/jethr.os

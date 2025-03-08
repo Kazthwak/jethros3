@@ -40,7 +40,7 @@ clear_keyboard_buffer();
 while(!is_key_waiting());
 clear_keyboard_buffer();
 clear_screen();
-print_string("Booted succesfully\nWelcome to ");
+print_string("Welcome to ");
 print_string(version);
 print_string("\n");
 main();

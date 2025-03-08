@@ -296,6 +296,69 @@ struct free_mem_link{
 	uint32_t length;
 }__attribute__((packed));
 
+struct fat_BPB{
+	uint8_t jump[3];
+	char OEM_identifier[8];
+	uint16_t bytes_per_sector;
+	uint8_t sectors_per_cluster;
+	uint16_t reserved_sectors;
+	uint8_t number_FATs;
+	uint16_t number_root_directories;
+	uint16_t number_sectors;
+	uint8_t media_desctriptor_type;
+	uint16_t sectors_per_FAT;
+	uint16_t sectors_per_track;
+	uint16_t number_heads;
+	uint32_t number_hidden_sectors;
+	uint32_t large_sector_count;
+}__attribute__((packed));
+
+struct fat_32_EBPB{
+	uint32_t FAT_size;
+	uint16_t flags;
+	uint16_t fat_version;
+	uint32_t cluster_root_directory;
+	uint16_t FSInfo_sector;
+	uint16_t backup_boot_sector;
+	uint8_t  zero[12];
+	uint8_t  drive_num;
+	uint8_t  reserved; //win NT flags
+	uint8_t  sig; //0x28 or 0x29
+	uint32_t volume_ID;
+	char     volume_label[11];
+	char     inconsistent[8]; //system identifier string. "FAT32   "
+}__attribute((packed));
+
+struct fat_time{
+	uint16_t creation_time;
+	uint16_t creation_date;
+}__attribute((packed));
+
+
+struct fat_8_3_entry{
+char     name[8];
+char     ext[3];
+uint8_t  attributes;
+uint8_t  reserved;
+uint8_t  creation_jiffy;
+struct fat_time creation_td;
+uint16_t last_accessed_date;
+uint16_t high_cluster_number;
+struct fat_time modification_td;
+uint16_t low_cluster_number;
+uint32_t file_size_bytes;
+}__attribute__((packed));
+
+struct fat_lfn{
+	uint8_t order;
+	uint16_t name0_5[5];
+	uint8_t attribute;
+	uint8_t long_entry_type;
+	uint8_t checksum_short;
+	uint16_t name1_6[6];
+	uint16_t zero;
+	uint16_t name2_2[2];
+}__attribute__((packed));
 
 //--------global variables
 //gdt
@@ -337,6 +400,13 @@ volatile struct keypress_data key_buffer[KEY_BUFFER_LENGTH];
 volatile uint16_t key_buffer_pointer_bottom;
 volatile uint16_t key_buffer_pointer_top;
 uint32_t next_free_kernel_mem;
+//disc
+//oxff is invalid and 0x00 is fat32
+uint8_t filesystem = 0xff;
+struct fat_BPB disc_BPB;
+struct fat_32_EBPB disc_EBPB_32;
+uint32_t total_sectors;
+uint32_t fat_sector_location;
 
 
 //--------prototypes
@@ -371,8 +441,8 @@ void hexdword(uint32_t num);
 void hexqword(uint64_t num);
 void binbyte(uint8_t num);
 void disc_init(void);
-bool disk_poll(void);
-bool disk_read(volatile struct disc_sector* sector_address, uint32_t LBA);
+bool disc_poll(void);
+bool disc_read(volatile struct disc_sector* sector_address, uint32_t LBA);
 void wordout(uint32_t port, uint16_t data);
 uint16_t wordin(uint32_t port);
 void byteout(uint32_t port, uint8_t data);

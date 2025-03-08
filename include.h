@@ -11,4 +11,7 @@
 #include "c/mem.c"
 #include "c/disc.c"
 
+//external includes
+#include "filesystem/source/ff.c"
+
 #include "c/debug.c"
