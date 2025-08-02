@@ -8,7 +8,10 @@ void main(){
 	while(true){
 		while(!is_key_waiting()){}
 		struct keypress_data tmp = get_keypress();
-		hexword(*(uint16_t*)&tmp);
+		binbyte((*(uint16_t*)&tmp)>>8);
+		putchar(' ');
+		hexbyte((*(uint16_t*)&tmp)&0xff);
+		putchar(' ');
 		putchar(' ');
 	}
 }

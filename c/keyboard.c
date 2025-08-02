@@ -1,6 +1,6 @@
 #include "../kernel.h"
 
-#define BAD_KEYBOARD
+// #define BAD_KEYBOARD
 
 void keyboard_handle(__attribute__((unused)) struct regs* r){
 static struct keypress_data key_data = {true, 0};

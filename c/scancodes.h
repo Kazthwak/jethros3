@@ -19,6 +19,7 @@
 #define KEY_w 			0b00010010
 #define KEY_s 			0b00010011
 #define KEY_z 			0b00010100
+#define KEY_ALT			0b00010101
 
 #define KEY_F2 			0b00011000
 #define KEY_3 			0b00011001
@@ -136,32 +137,32 @@
 //A VERY :ARGE TABLE THAT CAN BE USED TO TRANSLATE SET 3 SCANCODES INTO UNIQUE IDs
 
 uint8_t scancode_lookup_table[] = {
-KEY_INVALID//00 nothing
-KEY_INVALID//01 nothing
-KEY_INVALID//02 nothing
-KEY_INVALID//03 nothing
-KEY_INVALID//04 nothing
-KEY_INVALID//05 nothing
-KEY_INVALID//06 nothing
+	KEY_INVALID,	//00 nothing
+	KEY_INVALID,	//01 nothing
+	KEY_INVALID,	//02 nothing
+	KEY_INVALID,	//03 nothing
+	KEY_INVALID,	//04 nothing
+	KEY_INVALID,	//05 nothing
+	KEY_INVALID,	//06 nothing
 	KEY_F1,	//07 F1
 	KEY_ESC,	//08 ESC
-KEY_INVALID//09 nothing
-KEY_INVALID//0A nothing
-KEY_INVALID//0B nothing
-KEY_INVALID//0C nothing
+	KEY_INVALID,	//09 nothing
+	KEY_INVALID,	//0A nothing
+	KEY_INVALID,	//0B nothing
+	KEY_INVALID,	//0C nothing
 	KEY_TAB,	//0D TAB
 	KEY_TILDE,	//0E `
 	KEY_F2,	//0F F2
 
-KEY_INVALID//10 nothing
+	KEY_INVALID,	//10 nothing
 	KEY_CTRL_L,	//11 L CTRL
 	KEY_SHIFT_L,	//12 L SHIFT
-KEY_INVALID//13 nothing
+	KEY_INVALID,	//13 nothing
 	KEY_CAPS,	//14 CAPSLOCK
 	KEY_q,	//15 q
 	KEY_1,	//16 1
 	KEY_F3,	//17 F3
-KEY_INVALID//18 nothing
+	KEY_INVALID,	//18 nothing
 	KEY_ALT,	//19 L ALT
 	KEY_z,	//1A z
 	KEY_s,	//1B s
@@ -170,7 +171,7 @@ KEY_INVALID//18 nothing
 	KEY_2,	//1E 2
 	KEY_F4,	//1F F4
 
-KEY_INVALID//20 nothing
+	KEY_INVALID,	//20 nothing
 	KEY_c,	//21 c
 	KEY_x,	//22 x
 	KEY_d,	//23 d
@@ -178,7 +179,7 @@ KEY_INVALID//20 nothing
 	KEY_4,	//25 4
 	KEY_3,	//26 3
 	KEY_F5,	//27 F5
-KEY_INVALID//28 nothing
+	KEY_INVALID,	//28 nothing
 	KEY_SPACE,	//29 SPACE
 	KEY_v,	//2A v
 	KEY_f,	//2B f
@@ -187,7 +188,7 @@ KEY_INVALID//28 nothing
 	KEY_5,	//2E 5
 	KEY_F6,	//2F F6
 
-KEY_INVALID//30 nothing
+	KEY_INVALID,	//30 nothing
 	KEY_n,	//31 n
 	KEY_b,	//32 b
 	KEY_h,	//33 h
@@ -195,7 +196,7 @@ KEY_INVALID//30 nothing
 	KEY_y,	//35 y
 	KEY_6,	//36 6
 	KEY_F7,	//37 F7
-KEY_INVALID//38 nothing
+	KEY_INVALID,	//38 nothing
 	KEY_ALT_GR,	//39 R ALT
 	KEY_m,	//3A m
 	KEY_j,	//3B j
@@ -204,7 +205,7 @@ KEY_INVALID//38 nothing
 	KEY_8,	//3E 8
 	KEY_F8,	//3F F8
 
-KEY_INVALID//40 nothing
+	KEY_INVALID,	//40 nothing
 	KEY_COMMA,	//41 ,
 	KEY_k,	//42 k
 	KEY_i,	//43 i
@@ -212,7 +213,7 @@ KEY_INVALID//40 nothing
 	KEY_0,	//45 0
 	KEY_9,	//46 9
 	KEY_F9,	//47 F9
-KEY_INVALID//48 nothing (says used in i key release, but I think it's a typo)
+	KEY_INVALID,	//48 nothing (says used in i key release, but I think it's a typo)
 	KEY_FULL_STOP,	//49 .
 	KEY_FWD_SLASH,	//4A /
 	KEY_l,	//4B l
@@ -221,10 +222,10 @@ KEY_INVALID//48 nothing (says used in i key release, but I think it's a typo)
 	KEY_DASH,	//4E -
 	KEY_F10,	//4F F10
 
-KEY_INVALID//50 nothing
-KEY_INVALID//51 nothing
+	KEY_INVALID,	//50 nothing
+	KEY_INVALID,	//51 nothing
 	KEY_APOSTROPHE,	//52 '
-KEY_INVALID//53 nothing
+	KEY_INVALID,	//53 nothing
 	KEY_SQR_BRCK_L,	//54 [
 	KEY_EQUALS,	//55 =
 	KEY_F11,	//56 F11
@@ -234,7 +235,7 @@ KEY_INVALID//53 nothing
 	KEY_ENTER,	//5A ENTER
 	KEY_SQR_BRCK_R,	//5B ]
 	KEY_BACKSLASH,	//5C \
-KEY_INVALID//5D nothing
+	KEY_INVALID,	//5D nothing
 	KEY_F12,	//5E F12
 	KEY_SCRL_LCK,	//5F SCROLL LOCK
 
@@ -246,7 +247,7 @@ KEY_INVALID//5D nothing
 	KEY_END,	//65 END
 	KEY_BACKSPACE,	//66 BCKSPCE
 	KEY_INS,	//67 INSERT
-KEY_INVALID//68 nothing
+	KEY_INVALID,	//68 nothing
 	KEY_KP1,	//69 KP1
 	KEY_RIGHT_ARROW,	//6A RGHT ARW
 	KEY_KP4,	//6B KP 4
@@ -262,48 +263,48 @@ KEY_INVALID//68 nothing
 	KEY_KP6,	//74 KP 6
 	KEY_KP8,	//75 KP 8
 	KEY_NUMLCK,	//76 NUM LOCK
-KEY_INVALID//77 nothing
-KEY_INVALID//78 nothing
+	KEY_INVALID,	//77 nothing
+	KEY_INVALID,	//78 nothing
 	KEY_INVALID,	//79 KP END (WHAT ON EARTH IS THIS KEY??????????)
 	KEY_KP3,	//7A KP 3
-KEY_INVALID//7B nothing
+	KEY_INVALID,	//7B nothing
 	KEY_KP_ADD,	//7C KP +
 	KEY_KP9,	//7D KP 9
 	KEY_KP_MUL,	//7E KP *
-KEY_INVALID//7F nothing
+	KEY_INVALID,	//7F nothing
 
-KEY_INVALID//80 nothing
-KEY_INVALID//81 nothing
-KEY_INVALID//82 nothing
-KEY_INVALID//83 nothing
-KEY_INVALID//84 nothing
-KEY_INVALID//85 nothing
-KEY_INVALID//86 nothing
-KEY_INVALID//87 nothing
-KEY_INVALID//88 nothing
-KEY_INVALID//89 nothing
-KEY_INVALID//8A nothing
+	KEY_INVALID,	//80 nothing
+	KEY_INVALID,	//81 nothing
+	KEY_INVALID,	//82 nothing
+	KEY_INVALID,	//83 nothing
+	KEY_INVALID,	//84 nothing
+	KEY_INVALID,	//85 nothing
+	KEY_INVALID,	//86 nothing
+	KEY_INVALID,	//87 nothing
+	KEY_INVALID,	//88 nothing
+	KEY_INVALID,	//89 nothing
+	KEY_INVALID,	//8A nothing
 	KEY_SUPER_L,	//8B L WIN
-KEY_INVALID//8C R WIN
-KEY_INVALID//8D APPS
-KEY_INVALID//8E nothing
+	KEY_INVALID,	//8C R WIN
+	KEY_INVALID,	//8D APPS
+	KEY_INVALID,	//8E nothing
 	0 	//8F nothing
 /*
-KEY_INVALID//00
-KEY_INVALID//01
-KEY_INVALID//02
-KEY_INVALID//03
-KEY_INVALID//04
-KEY_INVALID//05
-KEY_INVALID//06
-KEY_INVALID//07
-KEY_INVALID//08
-KEY_INVALID//09
-KEY_INVALID//0A
-KEY_INVALID//0B
-KEY_INVALID//0C
-KEY_INVALID//0D
-KEY_INVALID//0E
-KEY_INVALID//0F
+	KEY_INVALID,	//00
+	KEY_INVALID,	//01
+	KEY_INVALID,	//02
+	KEY_INVALID,	//03
+	KEY_INVALID,	//04
+	KEY_INVALID,	//05
+	KEY_INVALID,	//06
+	KEY_INVALID,	//07
+	KEY_INVALID,	//08
+	KEY_INVALID,	//09
+	KEY_INVALID,	//0A
+	KEY_INVALID,	//0B
+	KEY_INVALID,	//0C
+	KEY_INVALID,	//0D
+	KEY_INVALID,	//0E
+	KEY_INVALID,	//0F
 */
 };
