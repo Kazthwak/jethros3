@@ -40,7 +40,7 @@ print_string("For getting me through my History GCSE\nMrs Robinson - For getting
 print_string("GCSE\nMr Coakes - For getting me though my D&T GCSE\n");
 print_string("Please don't be offended if you taught me and are not on this list. It means that I ");
 print_string("Liked your subject before being taught it, and therefore didn't need as much help from you. ");
-print_string("My results therefore do not show your teaching prowess");
+print_string("My results therefore do not show your (existant) teaching prowess");
 print_string("\nBoot completed. Press any key to continue.");
 clear_keyboard_buffer();
 while(!is_key_waiting());

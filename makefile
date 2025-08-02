@@ -8,13 +8,14 @@ run: jethros.iso hard_drive
 	-serial file:serial.log -m 1G -boot menu=off
 
 hard_drive: disc/*
-	@rm hard_drive
+	@rm -f hard_drive
+	@#echo "File blank_disc not found. It is a 64M file of 0s
 	@cp blank_disc hard_drive
-	@mcopy disc/* A:
+	@mcopy disc/* hard_drive
 
 jethros.iso: jethros.bin
 	@cp jethros.bin ./isodir/boot/jethr.os
-	@chronic grub-mkrescue -o jethros.iso isodir
+	@grub-mkrescue -o jethros.iso isodir
 
 kernel_asm.o: kernel.asm
 	@nasm kernel.asm -o kernel_asm.o -f elf32
