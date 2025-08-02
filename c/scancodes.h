@@ -129,179 +129,181 @@
 #define KEY_KP_ENTER 	0b10101100
 
 
+#define KEY_INVALID		0b11111111
+
 
 
 //A VERY :ARGE TABLE THAT CAN BE USED TO TRANSLATE SET 3 SCANCODES INTO UNIQUE IDs
 
 uint8_t scancode_lookup_table[] = {
-	0,	//00 nothing
-	0,	//01 nothing
-	0,	//02 nothing
-	0,	//03 nothing
-	0,	//04 nothing
-	0,	//05 nothing
-	0,	//06 nothing
-	0,	//07 F1
-	0,	//08 ESC
-	0,	//09 nothing
-	0,	//0A nothing
-	0,	//0B nothing
-	0,	//0C nothing
-	0,	//0D TAB
-	0,	//0E `
-	0,	//0F F2
+KEY_INVALID//00 nothing
+KEY_INVALID//01 nothing
+KEY_INVALID//02 nothing
+KEY_INVALID//03 nothing
+KEY_INVALID//04 nothing
+KEY_INVALID//05 nothing
+KEY_INVALID//06 nothing
+	KEY_F1,	//07 F1
+	KEY_ESC,	//08 ESC
+KEY_INVALID//09 nothing
+KEY_INVALID//0A nothing
+KEY_INVALID//0B nothing
+KEY_INVALID//0C nothing
+	KEY_TAB,	//0D TAB
+	KEY_TILDE,	//0E `
+	KEY_F2,	//0F F2
 
-	0,	//10 nothing
-	0,	//11 L CTRL
-	0,	//12 L SHIFT
-	0,	//13 nothing
-	0,	//14 CAPSLOCK
-	0,	//15 q
-	0,	//16 1
-	0,	//17 F3
-	0,	//18 nothing
-	0,	//19 L ALT
-	0,	//1A z
-	0,	//1B s
-	0,	//1C a
-	0,	//1D w
-	0,	//1E 2
-	0,	//1F F4
+KEY_INVALID//10 nothing
+	KEY_CTRL_L,	//11 L CTRL
+	KEY_SHIFT_L,	//12 L SHIFT
+KEY_INVALID//13 nothing
+	KEY_CAPS,	//14 CAPSLOCK
+	KEY_q,	//15 q
+	KEY_1,	//16 1
+	KEY_F3,	//17 F3
+KEY_INVALID//18 nothing
+	KEY_ALT,	//19 L ALT
+	KEY_z,	//1A z
+	KEY_s,	//1B s
+	KEY_a,	//1C a
+	KEY_w,	//1D w
+	KEY_2,	//1E 2
+	KEY_F4,	//1F F4
 
-	0,	//20 nothing
-	0,	//21 c
-	0,	//22 x
-	0,	//23 d
-	0,	//24 e
-	0,	//25 4
-	0,	//26 3
-	0,	//27 F5
-	0,	//28 nothing
-	0,	//29 SPACE
-	0,	//2A v
-	0,	//2B f
-	0,	//2C t
-	0,	//2D r
-	0,	//2E 5
-	0,	//2F F6
+KEY_INVALID//20 nothing
+	KEY_c,	//21 c
+	KEY_x,	//22 x
+	KEY_d,	//23 d
+	KEY_e,	//24 e
+	KEY_4,	//25 4
+	KEY_3,	//26 3
+	KEY_F5,	//27 F5
+KEY_INVALID//28 nothing
+	KEY_SPACE,	//29 SPACE
+	KEY_v,	//2A v
+	KEY_f,	//2B f
+	KEY_t,	//2C t
+	KEY_r,	//2D r
+	KEY_5,	//2E 5
+	KEY_F6,	//2F F6
 
-	0,	//30 nothing
-	0,	//31 n
-	0,	//32 b
-	0,	//33 h
-	0,	//34 g
-	0,	//35 y
-	0,	//36 6
-	0,	//37 F7
-	0,	//38 nothing
-	0,	//39 R ALT
-	0,	//3A m
-	0,	//3B j
-	0,	//3C u
-	0,	//3D 7
-	0,	//3E 8
-	0,	//3F F8
+KEY_INVALID//30 nothing
+	KEY_n,	//31 n
+	KEY_b,	//32 b
+	KEY_h,	//33 h
+	KEY_g,	//34 g
+	KEY_y,	//35 y
+	KEY_6,	//36 6
+	KEY_F7,	//37 F7
+KEY_INVALID//38 nothing
+	KEY_ALT_GR,	//39 R ALT
+	KEY_m,	//3A m
+	KEY_j,	//3B j
+	KEY_u,	//3C u
+	KEY_7,	//3D 7
+	KEY_8,	//3E 8
+	KEY_F8,	//3F F8
 
-	0,	//40 nothing
-	0,	//41 ,
-	0,	//42 k
-	0,	//43 i
-	0,	//44 q
-	0,	//45 0
-	0,	//46 9
-	0,	//47 F9
-	0,	//48 nothing (says used in I release, nut I think it's a typo)
-	0,	//49 .
-	0,	//4A /
-	0,	//4B l
-	0,	//4C ;
-	0,	//4D p
-	0,	//4E -
-	0,	//4F F10
+KEY_INVALID//40 nothing
+	KEY_COMMA,	//41 ,
+	KEY_k,	//42 k
+	KEY_i,	//43 i
+	KEY_q,	//44 q
+	KEY_0,	//45 0
+	KEY_9,	//46 9
+	KEY_F9,	//47 F9
+KEY_INVALID//48 nothing (says used in i key release, but I think it's a typo)
+	KEY_FULL_STOP,	//49 .
+	KEY_FWD_SLASH,	//4A /
+	KEY_l,	//4B l
+	KEY_SEMICOLON,	//4C ;
+	KEY_p,	//4D p
+	KEY_DASH,	//4E -
+	KEY_F10,	//4F F10
 
-	0,	//50 nothing
-	0,	//51 nothing
-	0,	//52 '
-	0,	//53 nothing
-	0,	//54 [
-	0,	//55 =
-	0,	//56 F11
-	0,	//57 PRNT SCRN
-	0,	//58 R CTRL
-	0,	//59 R SHFT
-	0,	//5A ENTER
-	0,	//5B ]
-	0,	//5C \
-	0,	//5D nothing
-	0,	//5E F12
-	0,	//5F SCROLL LOCK
+KEY_INVALID//50 nothing
+KEY_INVALID//51 nothing
+	KEY_APOSTROPHE,	//52 '
+KEY_INVALID//53 nothing
+	KEY_SQR_BRCK_L,	//54 [
+	KEY_EQUALS,	//55 =
+	KEY_F11,	//56 F11
+	KEY_PRNT_SCRN,	//57 PRNT SCRN
+	KEY_CTRL_R,	//58 R CTRL
+	KEY_SHIFT_R,	//59 R SHFT
+	KEY_ENTER,	//5A ENTER
+	KEY_SQR_BRCK_R,	//5B ]
+	KEY_BACKSLASH,	//5C \
+KEY_INVALID//5D nothing
+	KEY_F12,	//5E F12
+	KEY_SCRL_LCK,	//5F SCROLL LOCK
 
-	0,	//60 DOWN ARW
-	0,	//61 LEFT ARW
-	0,	//62 PAUSE
-	0,	//63 UP ARROW
-	0,	//64 DELETE
-	0,	//65 END
-	0,	//66 BCKSPCE
-	0,	//67 INSERT
-	0,	//68 nothing
-	0,	//69 KP1
-	0,	//6A RGHT ARW
-	0,	//6B KP 4
-	0,	//6C KP 7
-	0,	//6D PAGE DWN
-	0,	//6E HOME
-	0,	//6F PAGE UP
+	KEY_DOWN_ARROW,	//60 DOWN ARW
+	KEY_LEFT_ARROW,	//61 LEFT ARW
+	KEY_PAUSE,	//62 PAUSE
+	KEY_UP_ARROW,	//63 UP ARROW
+	KEY_DEL,	//64 DELETE
+	KEY_END,	//65 END
+	KEY_BACKSPACE,	//66 BCKSPCE
+	KEY_INS,	//67 INSERT
+KEY_INVALID//68 nothing
+	KEY_KP1,	//69 KP1
+	KEY_RIGHT_ARROW,	//6A RGHT ARW
+	KEY_KP4,	//6B KP 4
+	KEY_KP7,	//6C KP 7
+	KEY_PGDWN,	//6D PAGE DWN
+	KEY_HOME,	//6E HOME
+	KEY_PGUP,	//6F PAGE UP
 
-	0,	//70 KP 0
-	0,	//71 KP .
-	0,	//72 KP 2
-	0,	//73 KP 5
-	0,	//74 KP 6
-	0,	//75 KP 8
-	0,	//76 NUM LOCK
-	0,	//77 nothing
-	0,	//78 nothing
-	0,	//79 KP END
-	0,	//7A KP 3
-	0,	//7B nothing
-	0,	//7C KP +
-	0,	//7D KP 9
-	0,	//7E KP *
-	0,	//7F nothing
+	KEY_KP0,	//70 KP 0
+	KEY_KP_DEL,	//71 KP DEL
+	KEY_KP2,	//72 KP 2
+	KEY_KP5,	//73 KP 5
+	KEY_KP6,	//74 KP 6
+	KEY_KP8,	//75 KP 8
+	KEY_NUMLCK,	//76 NUM LOCK
+KEY_INVALID//77 nothing
+KEY_INVALID//78 nothing
+	KEY_INVALID,	//79 KP END (WHAT ON EARTH IS THIS KEY??????????)
+	KEY_KP3,	//7A KP 3
+KEY_INVALID//7B nothing
+	KEY_KP_ADD,	//7C KP +
+	KEY_KP9,	//7D KP 9
+	KEY_KP_MUL,	//7E KP *
+KEY_INVALID//7F nothing
 
-	0,	//80 nothing
-	0,	//81 nothing
-	0,	//82 nothing
-	0,	//83 nothing
-	0,	//84 nothing
-	0,	//85 nothing
-	0,	//86 nothing
-	0,	//87 nothing
-	0,	//88 nothing
-	0,	//89 nothing
-	0,	//8A nothing
-	0,	//8B L WIN
-	0,	//8C R WIN
-	0,	//8D APPS
-	0,	//8E nothing
+KEY_INVALID//80 nothing
+KEY_INVALID//81 nothing
+KEY_INVALID//82 nothing
+KEY_INVALID//83 nothing
+KEY_INVALID//84 nothing
+KEY_INVALID//85 nothing
+KEY_INVALID//86 nothing
+KEY_INVALID//87 nothing
+KEY_INVALID//88 nothing
+KEY_INVALID//89 nothing
+KEY_INVALID//8A nothing
+	KEY_SUPER_L,	//8B L WIN
+KEY_INVALID//8C R WIN
+KEY_INVALID//8D APPS
+KEY_INVALID//8E nothing
 	0 	//8F nothing
 /*
-	0,	//00 
-	0,	//01 
-	0,	//02 
-	0,	//03 
-	0,	//04 
-	0,	//05 
-	0,	//06 
-	0,	//07 
-	0,	//08 
-	0,	//09 
-	0,	//0A 
-	0,	//0B 
-	0,	//0C 
-	0,	//0D 
-	0,	//0E 
-	0,	//0F 
+KEY_INVALID//00
+KEY_INVALID//01
+KEY_INVALID//02
+KEY_INVALID//03
+KEY_INVALID//04
+KEY_INVALID//05
+KEY_INVALID//06
+KEY_INVALID//07
+KEY_INVALID//08
+KEY_INVALID//09
+KEY_INVALID//0A
+KEY_INVALID//0B
+KEY_INVALID//0C
+KEY_INVALID//0D
+KEY_INVALID//0E
+KEY_INVALID//0F
 */
 };
