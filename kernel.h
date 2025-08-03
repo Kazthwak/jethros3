@@ -6,9 +6,11 @@
 #include <stdbool.h>
 #include "c/font.h"
 #include "c/scancodes.h"
+#include "c/disc.h"
 
 //--------janks
 #define dump_obj(obj_name) dump_mem((uint32_t)&obj_name, sizeof(obj_name));
+
 
 //--------constants
 //gdt
@@ -400,13 +402,6 @@ volatile struct keypress_data key_buffer[KEY_BUFFER_LENGTH];
 volatile uint16_t key_buffer_pointer_bottom;
 volatile uint16_t key_buffer_pointer_top;
 uint32_t next_free_kernel_mem;
-//disc
-//oxff is invalid and 0x00 is fat32
-uint8_t filesystem = 0xff;
-struct fat_BPB disc_BPB;
-struct fat_32_EBPB disc_EBPB_32;
-uint32_t total_sectors;
-uint32_t fat_sector_location;
 
 
 //--------prototypes
@@ -440,9 +435,8 @@ void hexword(uint16_t num);
 void hexdword(uint32_t num);
 void hexqword(uint64_t num);
 void binbyte(uint8_t num);
-void disc_init(void);
-bool disc_poll(void);
-bool disc_read(volatile struct disc_sector* sector_address, uint32_t LBA);
+bool disc_poll_ATA_PIO(void);
+bool disc_read_ATA_PIO(volatile struct disc_sector* sector_address, uint32_t LBA);
 void wordout(uint32_t port, uint16_t data);
 uint16_t wordin(uint32_t port);
 void byteout(uint32_t port, uint8_t data);

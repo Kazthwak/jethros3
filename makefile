@@ -15,7 +15,7 @@ hard_drive: disc/*
 
 jethros.iso: jethros.bin
 	@cp jethros.bin ./isodir/boot/jethr.os
-	@grub-mkrescue -o jethros.iso isodir
+	@grub-mkrescue -o jethros.iso isodir > /dev/null
 
 kernel_asm.o: kernel.asm
 	@nasm kernel.asm -o kernel_asm.o -f elf32

@@ -37,18 +37,17 @@ void disc_init_fat_32(){
 }
 */
 
-void disc_init(){
-//assume fat 32. This is a bad assumption, but it will do for now. In the future I must check
-}
 
-bool disc_poll(){
+
+bool disc_poll_ATA_PIO(){
 	
 	//400ns delay
 	for(volatile uint8_t i = 0; i < 14; i++){
 		bytein(0x1f7);
 	}
-	
-	while(1){
+	//1 second deadline. Should work as long as TIMER_HZ is less than 2^16
+	uint16_t deadline = time + TIMER_FREQUENCY*1;
+	while(time < deadline){
 	uint8_t status = bytein(0x1f7);
 	uint8_t BSY, DRQ, ERR, DF;
 	BSY = (status&0b10000000)>>7;
@@ -64,13 +63,15 @@ bool disc_poll(){
 		return(true);
 	}
 	}
+	//DEADLINE PASSED
+	return(false);
 }
 
-bool disc_read(volatile struct disc_sector* sector_address, uint32_t LBA){
+bool disc_read_ATA_PIO(volatile struct disc_sector* sector_address, uint32_t LBA){
 	//starting disc read
 	//select the master drive
 	byteout(0x1f6, slave_drive | ((LBA >> 24) & 0x0F));
-	//requenst 1 sector
+	//request 1 sector
 	byteout(0x1f2, 1);
 	//send the sector address
 	byteout(0x1f3, LBA&0xff);
@@ -81,7 +82,7 @@ bool disc_read(volatile struct disc_sector* sector_address, uint32_t LBA){
 	byteout(0x1f7, 0x20);
 
 	//poll for ready
-	if(!disc_poll()){return(false);}
+	if(!disc_poll_ATA_PIO()){return(false);}
 
 	for(uint16_t i = 0; i<256; i++){
 		uint16_t val = wordin(0x1f0);
