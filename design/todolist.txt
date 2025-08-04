@@ -1,3 +1,8 @@
+Memory allocator
+A heap allocator that works, and a variable-length array system
+
+
+Change disc format to use a single FAT32 drive that is booted from, rather than having 2 drives that the os needs to have in.
 proper keyboard scancodes
 filesystem support
 program loading
@@ -5,6 +10,4 @@ system calls
 usermode
 security
 kernel is un-pre-emptable
-change slab allocation to the correct alignment (allocating from the beginning of the first large enough memory section)
-Implement the link co-allesor in the slab allocator
 Check what the filesystem is

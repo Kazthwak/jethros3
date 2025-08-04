@@ -2,40 +2,9 @@
 
 //fatfs stuff
 
-/*
-void disc_init_fat_32(){
-	struct disc_sector boot_sector;
-	if(!disc_read(&boot_sector, 0x0)){
-		filesystem = 0xff;
-		print_string("Disc initialisation failed!\n");
-		return;
-	}
-	//load structs into permanant ones
-	struct fat_BPB* tmp_fat_BPB = (struct fat_BPB*)&boot_sector;
-	struct fat_32_EBPB* tmp_fat_EBPB = (struct fat_32_EBPB*)(((uint32_t)&boot_sector)+sizeof(struct fat_BPB));
-	//silence the compiler. sector cannot be uninitialised, as that would be caught by the disc_read function returning false
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-	disc_BPB = *tmp_fat_BPB;
-	disc_EBPB_32 = *tmp_fat_EBPB;
-	#pragma GCC diagnostic pop
-	if(disc_BPB.bytes_per_sector != 0x200){
-		print_string("Disc initialisation failed. Sector size is not 512 bytes\n");
-		filesystem = 0xff;
-		return;
-	}
-	//set the total_sectors variable, based on wether the number_sectors field is 0
-	if(disc_BPB.number_sectors == 0){
-		total_sectors = disc_BPB.large_sector_count;
-	}else{
-		total_sectors = disc_BPB.number_sectors;
-	}
-	fat_sector_location = disc_BPB.reserved_sectors;
-	//this is returning the EBPB
-	disc_read(&boot_sector, ((disc_EBPB_32.cluster_root_directory - 2) * disc_BPB.sectors_per_cluster) + (disc_BPB.reserved_sectors + (disc_BPB.number_FATs * disc_EBPB_32.FAT_size) + 0));
-	dump_mem(&boot_sector, 0x200);
+void mono_disc_init(){
+
 }
-*/
 
 
 

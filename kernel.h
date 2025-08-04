@@ -24,7 +24,6 @@
 #define ONE_MB (0x400*0x400)
 #define FOUR_MB (0x4*ONE_MB)
 //memory allocation
-#define SLAB_SIZE (64*ONE_MB)
 //text
 #define CHAR_WIDTH 8
 #define CHAR_HEIGHT 16
@@ -37,6 +36,8 @@
 #define TIMER_FREQUENCY 41
 //keyboard
 #define KEY_BUFFER_LENGTH 1024
+
+#define SLAB_SIZE 1024
 
 //--------externs
 extern uint32_t eax_boot;
@@ -293,11 +294,6 @@ bool pressed;
 uint8_t code;
 }__attribute__((packed));
 
-struct free_mem_link{
-	uint32_t next_free_pointer;
-	uint32_t length;
-}__attribute__((packed));
-
 struct fat_BPB{
 	uint8_t jump[3];
 	char OEM_identifier[8];
@@ -362,6 +358,11 @@ struct fat_lfn{
 	uint16_t name2_2[2];
 }__attribute__((packed));
 
+struct kmalloc_link{
+	struct kmalloc_link* next_link;
+	uint32_t length;
+}__attribute__((packed));
+
 //--------global variables
 //gdt
 struct gdt_entry gdt[gdt_len];
@@ -387,10 +388,10 @@ uint32_t first_mem_hole;
 uint32_t phys_page_state[num_page_entries];
 uint32_t* page_directory = &page_directory_asm;
 void* page_tables[1024];
-//memory allocation
+
 uint32_t slab_start;
-uint32_t slab_end;
-uint32_t first_free_slab;
+uint32_t first_slab_block;
+
 //idt
 struct idt_ptr idtr;
 struct idt_entry idt_table[idt_len];
@@ -467,7 +468,10 @@ bool alloc_and_map_page(uint32_t virt_addr);
 uint32_t kmalloc_permanant_page(void);
 void init_mem_late(void);
 void dump_mem(uint32_t start, uint32_t length);
-uint32_t kmalloc_slab(uint32_t length);
-void kfree_slab(uint32_t memory);
+void mono_disc_init(void);
+void* kmalloc(uint32_t length);
+void kfree(void* address);
+void coalesce_slab(void);
+void k_slab_allocator_init(void);
 
 #endif

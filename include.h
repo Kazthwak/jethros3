@@ -9,6 +9,7 @@
 #include "c/text.c"
 #include "c/init.c"
 #include "c/mem.c"
+#include "c/malloc.c"
 #include "c/disc.c"
 
 //external includes

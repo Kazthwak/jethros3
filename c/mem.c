@@ -29,6 +29,8 @@ void mem_init(){
 	next_free_kernel_mem <<= 12;
 }
 
+uint8_t tmp_slab[SLAB_SIZE];
+
 void init_mem_late(){
 	//create new page tables
 	for(uint16_t i = 771; i < 1024; i++){
@@ -40,12 +42,11 @@ void init_mem_late(){
 		page_tables[i] = page_table;
 		page_directory[i] = get_phys_address((uint32_t)page_table) | 3;
 	}
-	slab_start = kmalloc_permanant(SLAB_SIZE);
-	slab_end = slab_start+SLAB_SIZE;
-	first_free_slab = slab_start;
-	struct free_mem_link* first_slab_link = (struct free_mem_link*)slab_start;
-	first_slab_link->length = SLAB_SIZE;
-	first_slab_link->next_free_pointer = 0x00000000;
+	slab_start = tmp_slab;
+	struct kmalloc_link* first_link = slab_start;
+	first_slab_block= first_link;
+	first_link->length = SLAB_SIZE;
+	first_link->next_link = first_link;
 }
 
 //pages on the boundaries of usability may be flagged as unusable when they are usable (off by one error)
@@ -204,6 +205,8 @@ uint32_t kmalloc_permanant_page(){
 	return(start);
 }
 
+//Old memory allocator. I am completely rewriting in a new file
+/*
 //heap work:
 //some large un-deallocateable section of memory. extendable?
 //maybe 32MB - use a define to make it easy to change
@@ -302,4 +305,4 @@ void kfree_slab(uint32_t memory){
 	prev_link->next_free_pointer = (uint32_t)new_link;
 	//update the new link to point to the next link
 	new_link->next_free_pointer = (uint32_t)cur_link;
-}
+}//*/

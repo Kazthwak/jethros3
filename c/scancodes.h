@@ -215,7 +215,7 @@ uint8_t scancode_lookup_table[] = {
 	KEY_F9,	//47 F9
 	KEY_INVALID,	//48 nothing (says used in i key release, but I think it's a typo)
 	KEY_FULL_STOP,	//49 .
-	KEY_FWD_SLASH,	//4A /
+	KEY_FWD_SLASH,	//4A forward_slash
 	KEY_l,	//4B l
 	KEY_SEMICOLON,	//4C ;
 	KEY_p,	//4D p
@@ -234,7 +234,7 @@ uint8_t scancode_lookup_table[] = {
 	KEY_SHIFT_R,	//59 R SHFT
 	KEY_ENTER,	//5A ENTER
 	KEY_SQR_BRCK_R,	//5B ]
-	KEY_BACKSLASH,	//5C \
+	KEY_BACKSLASH,	//5C backslash
 	KEY_INVALID,	//5D nothing
 	KEY_F12,	//5E F12
 	KEY_SCRL_LCK,	//5F SCROLL LOCK

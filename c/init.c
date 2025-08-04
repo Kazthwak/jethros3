@@ -28,6 +28,7 @@ print_string("IRQs INITIALISED\n");
 //timer init
 //keyboard init
 // disc_init();
+mono_disc_init();
 print_string("Disc controller initialised\n");
 init_mem_late();
 print_string("Finished memory initialisation\n");
