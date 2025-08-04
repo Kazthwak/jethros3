@@ -1,6 +1,7 @@
 #ifndef HEADER_GUARD
 #define HEADER_GUARD
-#define version "JETHROS3 Version 0.5"
+#define version "JETHROS3 Version 0.1"
+#define DEBUG_BUILD
 //--------includes
 #include <stdint.h>
 #include <stdbool.h>
@@ -471,7 +472,8 @@ void dump_mem(uint32_t start, uint32_t length);
 void mono_disc_init(void);
 void* kmalloc(uint32_t length);
 void kfree(void* address);
-void coalesce_slab(void);
 void k_slab_allocator_init(void);
-
+void test_keyboard(void);
+void error_can_continue(void);
+void space(void);
 #endif

@@ -1,0 +1,9 @@
+This, could be tricky.
+The device is booted from a drive 0
+Each drive is given a mount number (0-0xff)
+Each partition is given a sub-number (0-0xff)
+Currently only one partition and drive are supported, so the root drive is always /0/0, and this is the only drive
+/ is root, but only contains mounted drives
+Each drive may contain only 16 partitions
+Each partition has its own data block, detailing its filesystem etc
+Therefore, a file's path can be used to infer all that needs to be known about it.

@@ -5,3 +5,6 @@ This OS is a higher half kernel, with basic memory management <br/>
 My hope is that in the not-too-distant future, I will add proper FAT support (as opposed to the basic driver that can almost find the
 location of files), and then usermode and proper program loading. Then will come multithreading, which will be an interesting challenge,
 that I am both dreading and looking forward to. (Although the chances are that will be in version 4).
+
+Current features: <br/>
+Nothig of note yet, this is just a project. Once it can load programs, this section will be populated. This will be V0.2
