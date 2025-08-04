@@ -42,11 +42,7 @@ void init_mem_late(){
 		page_tables[i] = page_table;
 		page_directory[i] = get_phys_address((uint32_t)page_table) | 3;
 	}
-	slab_start = tmp_slab;
-	struct kmalloc_link* first_link = slab_start;
-	first_slab_block= first_link;
-	first_link->length = SLAB_SIZE;
-	first_link->next_link = first_link;
+	k_slab_allocator_init();
 }
 
 //pages on the boundaries of usability may be flagged as unusable when they are usable (off by one error)
