@@ -29,8 +29,6 @@ void mem_init(){
 	next_free_kernel_mem <<= 12;
 }
 
-uint8_t tmp_slab[SLAB_SIZE];
-
 void init_mem_late(){
 	//create new page tables
 	for(uint16_t i = 771; i < 1024; i++){
@@ -42,7 +40,7 @@ void init_mem_late(){
 		page_tables[i] = page_table;
 		page_directory[i] = get_phys_address((uint32_t)page_table) | 3;
 	}
-	k_slab_allocator_init();
+	k_heap_allocator_init();
 }
 
 //pages on the boundaries of usability may be flagged as unusable when they are usable (off by one error)

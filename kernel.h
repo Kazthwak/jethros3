@@ -38,7 +38,8 @@
 //keyboard
 #define KEY_BUFFER_LENGTH 1024
 
-#define SLAB_SIZE 1024
+#define HEAP_SIZE (1*page_size)
+#define HEAP_PAGES ((HEAP_SIZE)+(page_size)-1)/(page_size)
 
 //--------externs
 extern uint32_t eax_boot;
@@ -390,8 +391,8 @@ uint32_t phys_page_state[num_page_entries];
 uint32_t* page_directory = &page_directory_asm;
 void* page_tables[1024];
 
-uint32_t slab_start;
-uint32_t first_slab_block;
+uint32_t heap_start;
+uint32_t first_heap_block;
 
 //idt
 struct idt_ptr idtr;
@@ -472,7 +473,7 @@ void dump_mem(uint32_t start, uint32_t length);
 void mono_disc_init(void);
 void* kmalloc(uint32_t length);
 void kfree(void* address);
-void k_slab_allocator_init(void);
+void k_heap_allocator_init(void);
 void test_keyboard(void);
 void error_can_continue(void);
 void space(void);

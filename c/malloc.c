@@ -1,11 +1,11 @@
 #include "../kernel.h"
 
 
-void k_slab_allocator_init(void){
-	slab_start = (uint32_t)tmp_slab;
-	struct kmalloc_link* first_link = (struct kmalloc_link*)slab_start;
-	first_slab_block = (uint32_t)first_link;
-	first_link->length = SLAB_SIZE;
+void k_heap_allocator_init(void){
+	heap_start = kmalloc_permanant(HEAP_SIZE);
+	struct kmalloc_link* first_link = (struct kmalloc_link*)heap_start;
+	first_heap_block = (uint32_t)first_link;
+	first_link->length = HEAP_SIZE;
 	first_link->next_link = first_link;
 }
 
@@ -21,7 +21,7 @@ void* kmalloc(uint32_t length){
 		return(0x0);
 	}
 	uint32_t needed_length = length + sizeof(struct alloc_tmp_str);
-	struct kmalloc_link* current_link = (struct kmalloc_link*)first_slab_block;
+	struct kmalloc_link* current_link = (struct kmalloc_link*)first_heap_block;
 	//inintial variables have been setup. Next, I need to traverse the linked list
 	while(1){
 		//check if the current link will do by seeing if it is long enough to contain both the header for the link and the data itself
@@ -29,7 +29,7 @@ void* kmalloc(uint32_t length){
 			break;
 		}
 		//if not, and the current link points back to the first link, return 0, a null pointer
-		if((uint32_t)current_link->next_link == first_slab_block){
+		if((uint32_t)current_link->next_link == first_heap_block){
 			return(0x0);
 		}
 		//large enough block has not been found, but there are more blocks. traverse the list
@@ -55,11 +55,11 @@ void kfree(void* address){
 	uint32_t true_address = (uint32_t)address - sizeof(struct alloc_tmp_str);
 	struct alloc_tmp_str* alloced_struct = (struct alloc_tmp_str*)true_address;
 	//get the first link
-	struct kmalloc_link* current_link = (struct kmalloc_link*)first_slab_block;
+	struct kmalloc_link* current_link = (struct kmalloc_link*)first_heap_block;
 	//traverse the structure, until the current link (is before the address to be freed (this should be implied by the search method), and) points to after the address (or back to the first link)
 	while(1){
 		//Link loops back to beginning or past the address being freed
-		if((uint32_t)(current_link->next_link) == first_slab_block || (uint32_t)(current_link->next_link) > true_address){
+		if((uint32_t)(current_link->next_link) == first_heap_block || (uint32_t)(current_link->next_link) > true_address){
 			break;
 		}
 		//goto the next link
@@ -82,7 +82,7 @@ void kfree(void* address){
 		new_link->next_link = (new_link->next_link)->next_link;
 	}
 	//check if it is the last link
-	if(new_link->length + (uint32_t)new_link > slab_start+SLAB_SIZE || (new_link->length + (uint32_t)new_link == slab_start+SLAB_SIZE && (uint32_t)new_link->next_link != first_slab_block)){
+	if(new_link->length + (uint32_t)new_link > heap_start+HEAP_SIZE || (new_link->length + (uint32_t)new_link == heap_start+HEAP_SIZE && (uint32_t)new_link->next_link != first_heap_block)){
 		print_string("ERROR, COALESCING OF SLAB BLOCK RESULTED IN BLOCK PAST SLAB BOUNDS OR TERMINATING BLOCK NOT POINTING TO INITIAL BLOCK");
 		error_can_continue();
 	}
@@ -93,5 +93,5 @@ void kfree(void* address){
 		current_link->next_link = new_link->next_link;
 	}
 	//memory has been freed, and the links concatenated if possible. Now I just have to hope there are no memory leaks.
-	//This implementation is kind of flawed. Although not a leak, the code can end up with lots of 8 length links (so they cannot be allocaed). This is very abusable as long as you know the slab size
+	//This implementation is kind of flawed. Although not a leak, the code can end up with lots of 8 length links (so they cannot be allocaed). This is very abusable as long as you know the heap size
 }
