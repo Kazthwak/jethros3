@@ -26,9 +26,9 @@ align 4
 	;mode
 	dd 0
 	;width
-	dd 1024
+	dd 640
 	;height
-	dd 768
+	dd 480
 	;depth
 	dd 0
 
