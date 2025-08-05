@@ -5,14 +5,14 @@
 //after initialising, the first page table (first 4MB) is mapped to 0xc0000000
 //next step is to find the video memory, and map it
 //functions needed:
-//
 
+
+void* phys_mem_pokage;
+uint32_t phys_mem_pokage_last_base = 0xffffffff;
 
 void mem_init(){
 	end_of_used_ram = &_kernel_end;
 	beg_of_used_ram = (void*)(((uint32_t)&_kernel_start)+PAGING_OFFSET);
-	uint32_t max_mem = stateinfo.mem_upper;
-	max_mem *= 1024; //now contains the size of upper memory in bytes
 	max_mem += ONE_MB; //Now adjusted for the ignored first MB of memory
 	first_mem_hole = max_mem;
 	for(uint16_t i= 0; i < 1024; i++){
@@ -27,6 +27,7 @@ void mem_init(){
 	next_free_kernel_mem >>= 12;
 	next_free_kernel_mem++;
 	next_free_kernel_mem <<= 12;
+	phys_mem_pokage = (void*)kmalloc_permanant_page();
 }
 
 void init_mem_late(){
@@ -159,6 +160,29 @@ bool alloc_and_map_page(uint32_t virt_addr){
 	}
 	map_page(phys_addr, virt_addr);
 	return(true);	
+}
+
+void ready_phys_address(uint32_t address){
+	uint32_t page_base = (address/page_size)*page_size;
+	if(page_base == phys_mem_pokage_last_base && 0){
+		return;
+	}
+	phys_mem_pokage_last_base = page_base;
+	map_page(page_base, (uint32_t)phys_mem_pokage);
+}
+
+uint32_t peak_phys_address(uint32_t address){
+	print_string("THIS DOES NOT WORK");
+	ready_phys_address(address);
+	uint32_t* addr = (uint32_t*)((address%page_size) + (uint32_t)phys_mem_pokage);
+	return(*addr);
+}
+
+void poke_phys_address(uint32_t address, uint32_t value){
+	print_string("THIS DOES NOT WORK");
+	ready_phys_address(address);
+	uint32_t* addr = (uint32_t*)((address%page_size) + (uint32_t)phys_mem_pokage);
+	*addr = value;
 }
 
 //virtual address space todos

@@ -1,15 +1,12 @@
 #include "../kernel.h"
 
 void graphics_init(){
-	screen_address = (uint32_t*)vbe_info.phys_addr;
-	x_res = vbe_info.x_res;
-	y_res = vbe_info.y_res;
 	x_char_res = x_res/CHAR_WIDTH;
 	y_char_res = y_res/CHAR_HEIGHT;
 	uint32_t screen_size = (x_res*y_res)<<2;
 	uint32_t screen_pages = screen_size/page_size;
 	if(screen_pages > 768){
-		hang();
+		//hang();
 	}
 	for(uint16_t i = 0; i < (sizeof(framebuffer)/page_size); i++){
 		map_page(((uint32_t)screen_address+(page_size*i)), ((uint32_t)&framebuffer+(page_size*i)));

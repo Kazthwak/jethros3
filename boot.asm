@@ -1,11 +1,11 @@
-MBALIGN  equ  1 << 0            ; align loaded modules on page boundaries
-MEMINFO  equ  1 << 1            ; provide memory map
-VIDEO    equ  1 << 2            ; change video mode
-MBFLAGS  equ  MBALIGN | MEMINFO | VIDEO; this is the Multiboot 'flag' field
-MAGIC    equ  0x1BADB002        ; 'magic number' lets bootloader find the header
-CHECKSUM equ -(MAGIC + MBFLAGS)   ; checksum of above, to prove we are multiboot
+MAGIC		equ 0xE85250D6			; 'magic number' lets bootloader find the header
+ARCH		equ	00					; 32-bit i386
+LENGTH		equ	multiboot_end-multiboot_start	;length of multiboot header
+CHECKSUM	equ -(MAGIC + ARCH + LENGTH)	; checksum of above, to prove we are multiboot
 
 BEG_OFFSET equ 0xC0000000		;The offset to be subtracted before paging is set up
+
+MULTIBOOT_INFO_MAX_SIZE equ 0x4*0x400
 
 ; Declare a multiboot header that marks the program as a kernel. These are magic
 ; values that are documented in the multiboot standard. The bootloader will
@@ -13,25 +13,29 @@ BEG_OFFSET equ 0xC0000000		;The offset to be subtracted before paging is set up
 ; 32-bit boundary. The signature is in its own section so the header can be
 ; forced to be within the first 8 KiB of the kernel file.
 section .multiboot.data
-align 4
+multiboot_start:
+align 8
 	dd MAGIC
-	dd MBFLAGS
+	dd ARCH
+	dd LENGTH
 	dd CHECKSUM
-	dd 0
-	dd 0
-	dd 0
-	dd 0
-	dd 0
-	;graphics
-	;mode
-	dd 0
-	;width
-	dd 640
-	;height
-	dd 480
-	;depth
-	dd 0
 
+align 8
+	;graphics tag
+	dw 05		;graphics flag type
+	dw 00		;flags
+	dd 20		;size of tag
+	dd 640		;width of screen
+	dd 480		;height of screen
+	dd 0		;depth of screen
+
+align 8
+	;null tag
+	dw 0
+	dw 0
+	dd 08
+multiboot_end:
+	
 ;page tables
 section .bss
 align 4096
@@ -53,10 +57,28 @@ section .multiboot.text
 global _start
 extern eax_boot
 extern ebx_boot
+extern multiboot2_space
 extern kernel_entry
 _start:
 	mov [eax_boot-BEG_OFFSET], eax
 	mov [ebx_boot-BEG_OFFSET], ebx
+	;paging is off, so this is a perfect time to do janky things
+	
+	copy_multiboot_structs:
+		;copy them. Memory accesses need to have BEG_OFFSET subtracted from them to account for future paging
+		;eax is the counter/pointer
+		;this outine will copy more than necassary
+		;ebx is the base to add eax to
+		mov eax, 0
+		.loop:
+			cmp eax, (MULTIBOOT_INFO_MAX_SIZE-8)
+			jg copy_multiboot_structs.end
+			mov ecx, [eax+ebx]
+			mov [eax+multiboot2_space-BEG_OFFSET], ecx
+			;mov [eax], ecx
+			inc eax
+			jmp copy_multiboot_structs.loop
+		.end:
 	;start the jank
 	;fill beginning of page directory
 		;empty it
