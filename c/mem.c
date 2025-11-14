@@ -36,7 +36,7 @@ void init_mem_late(){
 		//allocate a page table
 		uint32_t* page_table = (uint32_t*)kmalloc_permanant_page();
 		//fill with 0
-		memset((uint32_t)page_table, 0x0, page_size);
+		memset(page_table, 0x0, page_size);
 		//put it in the page directory and the page table list
 		page_tables[i] = page_table;
 		page_directory[i] = get_phys_address((uint32_t)page_table) | 3;
@@ -127,10 +127,10 @@ uint32_t get_phys_address(uint32_t address){
 	offset = address&0b111111111111;
 	uint32_t dir_entry_data = page_directory[dir_entry];
 	if((dir_entry_data&0b1) == 0){return(0xffffffff);}
-	uint32_t* page_table = (uint32_t*)page_tables[dir_entry];
-	uint32_t table_entry_data = page_table[table_entry];
+		uint32_t* page_table = (uint32_t*)page_tables[dir_entry];
+		uint32_t table_entry_data = page_table[table_entry];
 	if((table_entry_data&1) == 0){return(0xffffffff);}
-	uint32_t tmp = (table_entry_data>>12)<<12;
+		uint32_t tmp = (table_entry_data>>12)<<12;
 	return(tmp+offset);
 }
 

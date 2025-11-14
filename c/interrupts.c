@@ -57,7 +57,7 @@ void irq_init(){
 
 	pic_remap();
 	for(uint8_t i = 0; i <16; i++){IRQ_set_mask(i);}
-	memset((uint32_t)&irq_handle_functions, 0, sizeof(irq_handle_functions));
+	memset(&irq_handle_functions, 0, sizeof(irq_handle_functions));
 	inton();
 }
 

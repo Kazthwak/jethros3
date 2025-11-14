@@ -25,7 +25,7 @@ void gdt_set_entry(uint8_t entry, uint32_t base, uint32_t limit, uint8_t access,
 #define user_data_gran 0xCF
 
 void gdt_init(){
-	memset((uint32_t)&gdt, 0, sizeof(gdt));
+	memset(&gdt, 0, sizeof(gdt));
 	//null descriptor
 	gdt_set_entry(0, 0, 0, 0, 0);
 	//kernel code	0-GB, kernel below 4M

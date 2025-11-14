@@ -7,8 +7,11 @@ void putchar(char character){
 	}
 	putcharxyc(cursor_x, cursor_y, character);
 	cursor_x++;
-	if(cursor_x >= x_char_res){
+	if(cursor_x >= x_char_res-1){
 		newline();
+	}
+	if(cursor_y >= y_char_res-1){
+		//scroll
 	}
 }
 

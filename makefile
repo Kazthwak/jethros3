@@ -2,7 +2,7 @@
 
 default: run
 
-run: jethros.img hard_drive
+run: jethros.img
 	@rm serial.log -f
 	@qemu-system-x86_64 -drive format=raw,file=jethros.img,media=disk -boot menu=off -serial file:serial.log -m 1G \
 	-drive if=pflash,format=raw,readonly=on,file=./grub_files/OVMF_CODE.4m.fd -drive if=pflash,format=raw,file=./grub_files/OVMF_VARS.4m.fd
@@ -27,13 +27,18 @@ boot.o: boot.asm
 	@nasm boot.asm -o boot.o -f elf32
 
 kernel.o: kernel.c kernel.h c/IO.c c/graphics.c c/gdt.c c/idt.c c/interrupts.c c/utils.c c/keyboard.c c/time.c c/debug.c \
-c/text.c c/init.c c/mem.c c/font.h c/disc.c c/time.c c/scancodes.h c/malloc.c c/disc.h makefile
-	@~/opt/cross/bin/i686-elf-gcc -c kernel.c -o kernel.o -ffreestanding -O2 -nostdlib -lgcc
+c/text.c c/init.c c/mem.c c/font.h c/disc.c c/time.c c/scancodes.h c/malloc.c c/disc.h makefile c/vector.h lib/string-code.h lib/stdlib-code.h
+	@~/opt/cross/bin/i686-elf-gcc -c kernel.c -o kernel.o -ffreestanding -O3 -nostdlib -lgcc -Wall -Wextra -IFAT
 	@#-std=gnu99 -Wall -Wextra
 	
-jethros.bin: kernel_asm.o boot.o kernel.o makefile
+jethros.bin: kernel_asm.o boot.o kernel.o makefile FAT/lib/libfatfs.a
 	@~/opt/cross/bin/i686-elf-gcc -T ./linker.ld -o jethros.bin -ffreestanding -O2 -nostdlib boot.o kernel_asm.o \
-	kernel.o -lgcc
+	kernel.o FAT/lib/libfatfs.a -lgcc
 
 clean:
 	@rm boot.o BOOTX64.EFI jethros.img kernel.o kernel_asm.o serial.log
+
+FAT/lib/libfatfs.a: 
+	@echo FAT_LIB_REBUILT
+	@make -C FAT clean
+	@make -C FAT GCC_PREFIX=~/opt/cross/bin/i686-elf- COMPILER=gcc SHARED_LIB=no EXTRA_CFLAGS="-DFAT_PRINTF_NOINC_STDIO -I./lib"

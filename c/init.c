@@ -27,7 +27,6 @@ struct basic_mem_info{
 }__attribute__((packed));
 
 void parse_multiboot2(){
-	uint32_t *asd = 0xc0000000;
 	uint8_t* data_arr = multiboot2_space;
 	uint16_t multiboot_tag_pointer = 0;
 	struct multiboot2_header* multiboot2_data_header = (struct multiboot2_header*)&data_arr[multiboot_tag_pointer];
@@ -48,6 +47,7 @@ void parse_multiboot2(){
 				screen_address = (uint32_t*)(uint32_t)framebuffer_info->framebuffer_addr;
 				x_res = framebuffer_info->framebuffer_width;
 				y_res = framebuffer_info->framebuffer_height;
+				pitch = framebuffer_info->framebuffer_pitch;
 				break;
 			case 4:		//basic memory information
 				struct basic_mem_info* mem_info = data_addr;
@@ -66,7 +66,6 @@ void parse_multiboot2(){
 void kernel_init(){
 	
 	gdt_init();
-	
 	parse_multiboot2();
 	
 	mem_init();
@@ -77,17 +76,15 @@ void kernel_init(){
 	print_string("IDT initialised\n");
 	irq_init();
 	print_string("IRQs INITIALISED\n");
-	//timer init
-	//keyboard init
-	// disc_init();
-	mono_disc_init();
-	print_string("Disc controller initialised\n");
 	init_mem_late();
 	print_string("Finished memory initialisation with "); hexdword(HEAP_SIZE); print_string(" bytes of heap size\n");
+	vector_init();
 	time_init();
 	print_string("Timer Initialised\n");
 	keyboard_init();
 	print_string("Keyboard initialised\n");
+	mono_disc_init();
+	print_string("Disc controller initialised\n");
 	print_string("Special thanks to:\nDr Edwall - For getting me through my English GCSEs\nDr Kerney - ");
 	print_string("For getting me through my History GCSE\nMrs Robinson - For getting me through my Biology ");
 	print_string("GCSE\nMr Coakes - For getting me though my D&T GCSE\n");

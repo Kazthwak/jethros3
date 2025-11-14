@@ -45,6 +45,7 @@ void* kmalloc(uint32_t length){
 	allocated_memory->length = needed_length;
 	//update the link
 	current_link->length = unused_space;
+	// print_string("Memory allocated\n");
 	return(&(allocated_memory->data));
 }
 
@@ -94,4 +95,5 @@ void kfree(void* address){
 	}
 	//memory has been freed, and the links concatenated if possible. Now I just have to hope there are no memory leaks.
 	//This implementation is kind of flawed. Although not a leak, the code can end up with lots of 8 length links (so they cannot be allocaed). This is very abusable as long as you know the heap size
+	// print_string("Memory freed\n");
 }

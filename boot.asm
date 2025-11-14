@@ -25,8 +25,8 @@ align 8
 	dw 05		;graphics flag type
 	dw 00		;flags
 	dd 20		;size of tag
-	dd 640		;width of screen
-	dd 480		;height of screen
+	dd 1024		;width of screen
+	dd 768		;height of screen
 	dd 0		;depth of screen
 
 align 8

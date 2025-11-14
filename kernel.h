@@ -1,13 +1,21 @@
 #ifndef HEADER_GUARD
 #define HEADER_GUARD
-#define version "JETHROS3 Version 0.1"
+#define version "JETHROS3 Version 0.2"
 #define DEBUG_BUILD
 //--------includes
 #include <stdint.h>
 #include <stdbool.h>
+#include "lib/string-code.h"
+#include "lib/stdlib-code.h"
 #include "c/font.h"
 #include "c/scancodes.h"
-#include "c/disc.h"
+#include "c/vector.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wunused-functio"
+#define FAT_PRINTF_NOINC_STDIO
+#include "FAT/fat_filelib.h"
+#pragma GCC diagnostic pop
 
 //--------janks
 #define dump_obj(obj_name) dump_mem((uint32_t)&obj_name, sizeof(obj_name));
@@ -209,9 +217,9 @@ struct regs{
     volatile uint32_t eip, cs, eflags, useresp, ss;   /* pushed by the processor automatically */ 
 }__attribute__((packed));
 
-struct disc_sector{
+typedef struct disc_sector{
 	uint8_t data[512];
-}__attribute__((packed));
+}__attribute__((packed)) disc_sector;
 
 struct keypress_data{
 bool pressed;
@@ -290,7 +298,7 @@ struct kmalloc_link{
 //--------global variables
 
 //4 KB
-volatile __attribute__ ((aligned (32))) uint8_t multiboot2_space[0x400*0x4];
+__attribute__ ((aligned (32))) uint8_t multiboot2_space[0x400*0x4];
 //NOT A RELIABLE VARIABLE
 uint32_t max_mem = 0xffffffff;
 
@@ -301,6 +309,7 @@ struct tss_t tss;
 //graphics
 uint16_t x_res;
 uint16_t y_res;
+uint32_t pitch;
 uint16_t x_char_res;
 uint16_t y_char_res;
 uint16_t cursor_x;
@@ -330,10 +339,10 @@ volatile uint16_t key_buffer_pointer_bottom;
 volatile uint16_t key_buffer_pointer_top;
 uint32_t next_free_kernel_mem;
 
+//disc
+vector* drives;
 
 //--------prototypes
-void memset(uint32_t base, uint8_t val, uint32_t length);
-void memcpy(void* start, uint32_t length, void* dest);
 void kernel_init(void);
 void main(void);
 void gdt_init(void);
@@ -403,4 +412,7 @@ void error_can_continue(void);
 void space(void);
 uint32_t peak_phys_address(uint32_t address);
 void poke_phys_address(uint32_t address, uint32_t value);
+vector* resize_vector(vector* target_vector, uint32_t new_size);
+int abstracted_disc_part_write(uint32_t sector, uint8_t* buffer, uint32_t sector_count);
+int abstracted_disc_part_read(uint32_t sector, uint8_t* buffer, uint32_t sector_count);
 #endif

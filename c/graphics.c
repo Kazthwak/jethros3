@@ -6,7 +6,7 @@ void graphics_init(){
 	uint32_t screen_size = (x_res*y_res)<<2;
 	uint32_t screen_pages = screen_size/page_size;
 	if(screen_pages > 768){
-		//hang();
+		hang();
 	}
 	for(uint16_t i = 0; i < (sizeof(framebuffer)/page_size); i++){
 		map_page(((uint32_t)screen_address+(page_size*i)), ((uint32_t)&framebuffer+(page_size*i)));
@@ -17,19 +17,21 @@ void graphics_init(){
 }
 
 void clear_screen(){
-	memset((uint32_t)&framebuffer, 0x0, sizeof(framebuffer));
+	memset((void*)&framebuffer, 0x0, sizeof(framebuffer));
 	cursor_x = 0;
 	cursor_y = 0;
 }
 
 void putpixel(uint16_t x, uint16_t y, uint32_t colour){
 	if(x >= x_res || y >= y_res){return;}
-	*(uint32_t*)((uint32_t)&framebuffer + ((x + (y*x_res))<<2)) = colour;
+	//*(uint32_t*)((uint32_t)&framebuffer + ((x + (y*x_res))<<2)) = colour;
+	*(uint32_t*)((uint32_t)&framebuffer + ((x)<<2)+ y*pitch) = colour;
 }
 
 void draw_rect(uint16_t x, uint16_t y, uint16_t x_size, uint16_t y_size, uint32_t colour){
 	if((x+x_size) >= x_res || (y+y_size) >= y_res){return;}
-	uint32_t start_mem = (uint32_t)&framebuffer + ((x + (y*x_res))<<2);
+	//uint32_t start_mem = (uint32_t)&framebuffer + ((x + (y*x_res))<<2);
+	uint32_t start_mem = (uint32_t)&framebuffer + (((x)<<2) + y*pitch);
 	for(uint16_t v = 0; v < y_size; v++){
 		for(uint16_t u = 0; u < x_size; u++){
 			((uint32_t*)start_mem)[u] = colour;
