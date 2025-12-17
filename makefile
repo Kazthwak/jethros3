@@ -26,8 +26,8 @@ kernel_asm.o: kernel.asm
 boot.o: boot.asm
 	@nasm boot.asm -o boot.o -f elf32
 
-kernel.o: kernel.c kernel.h c/IO.c c/graphics.c c/gdt.c c/idt.c c/interrupts.c c/utils.c c/keyboard.c c/time.c c/debug.c \
-c/text.c c/init.c c/mem.c c/font.h c/disc.c c/time.c c/scancodes.h c/malloc.c c/disc.h makefile c/vector.h lib/string-code.h lib/stdlib-code.h
+kernel.o: kernel.c kernel.h c/IO.c c/graphics.c c/gdt.c c/idt.c c/interrupts.c c/utils.c c/keyboard.c c/time.c c/debug.c c/load_prog.c \
+c/text.c c/init.c c/mem.c c/font.h c/disc.c c/time.c c/scancodes.h c/malloc.c c/disc.h makefile c/vector.h lib/string-code.h lib/stdlib-code.h c/syscall.c c/shell.c
 	@~/opt/cross/bin/i686-elf-gcc -c kernel.c -o kernel.o -ffreestanding -O3 -nostdlib -lgcc -Wall -Wextra -IFAT
 	@#-std=gnu99 -Wall -Wextra
 	

@@ -82,9 +82,12 @@ int abstracted_disc_part_read(uint32_t sector, uint8_t* buffer, uint32_t sector_
 }
 
 int abstracted_disc_part_write(uint32_t sector, uint8_t* buffer, uint32_t sector_count){
+	(void)buffer;
+	(void)sector;
 	if(sector_count != 1){print_string("SECTOR_COUNT_WRITE_NOT_1"); hang();}
 	print_string("WRITE USED");
 	hang();
+	__builtin_unreachable();
 }
 
 bool disc_poll_ATA_PIO(){

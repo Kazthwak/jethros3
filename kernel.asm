@@ -48,9 +48,15 @@ inton:
 	sti
 	ret
 
+extern test_var
 global testing
 testing:
-	int 0x20
+	pusha
+	mov dword ebx, [test_var]
+	mov eax, 0
+	int 0x30
+	mov dword [test_var], eax
+	popa
 	ret
 
 %include "int.asm"

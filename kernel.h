@@ -12,7 +12,7 @@
 #include "c/vector.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wunused-functio"
+#pragma GCC diagnostic ignored "-Wunused-function"
 #define FAT_PRINTF_NOINC_STDIO
 #include "FAT/fat_filelib.h"
 #pragma GCC diagnostic pop
@@ -59,6 +59,7 @@ extern uint32_t page_directory_asm;
 extern void* page_table_kernel_1;
 extern void* page_table_kernel_2;
 extern void* page_table_kernel_3;
+volatile uint32_t test_var;
 
 extern void hang(void);
 extern void hang_int(void);
@@ -118,7 +119,7 @@ extern void irq12(void);
 extern void irq13(void);
 extern void irq14(void);
 extern void irq15(void);
-
+extern void irq16(void); //This one is actually the syscall
 
 
 struct gdt_entry{
@@ -415,4 +416,7 @@ void poke_phys_address(uint32_t address, uint32_t value);
 vector* resize_vector(vector* target_vector, uint32_t new_size);
 int abstracted_disc_part_write(uint32_t sector, uint8_t* buffer, uint32_t sector_count);
 int abstracted_disc_part_read(uint32_t sector, uint8_t* buffer, uint32_t sector_count);
+void int0x30handle(struct regs* r);
+void shell(void);
+char get_ascii(uint8_t code);
 #endif

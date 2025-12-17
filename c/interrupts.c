@@ -54,6 +54,7 @@ void irq_init(){
 	set_idt_entry(45, (uint32_t)irq13, 0x08, 0x8e);
 	set_idt_entry(46, (uint32_t)irq14, 0x08, 0x8e);
 	set_idt_entry(47, (uint32_t)irq15, 0x08, 0x8e);
+	set_idt_entry(0x30, (uint32_t)irq16, 0x08, 0x8e);
 
 	pic_remap();
 	for(uint8_t i = 0; i <16; i++){IRQ_set_mask(i);}
@@ -72,6 +73,10 @@ void set_irq_handler(uint8_t num, void* function){
 }
 
 void irq_handler(struct regs *r){
+	if(r->int_no == 0x30){
+		int0x30handle(r);
+		return;
+	}
 	// print_string("Irq handler fired. Number ");
 	// hexbyte(r->int_no);
 	// hang();

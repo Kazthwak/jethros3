@@ -9,6 +9,6 @@ that I am both dreading and looking forward to. (Although the chances are that w
 Current features: <br/>
 Nothig of note yet, this is just a project. Once it can load programs, this section will be populated. This will be V0.3
 <br/>
-FAT library: (That I somehow made work): https://github.com/ultraembedded/fat_io_lib/tree/master. <br\>
-This is currently read-only, and updating it is low on my priority list, as the disc is overwritten every compile, so writes wouldn't be very useful. <br\>
+FAT library: (That I somehow made work): https://github.com/ultraembedded/fat_io_lib/tree/master. <br/>
+This is currently read-only, and updating it is low on my priority list, as the disc is overwritten every compile, so writes wouldn't be very useful. <br/>
 This must be compiled so that it can be used (and put in a folder named FAT so that the OS can access the headers). A command to do that is in the makefile

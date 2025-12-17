@@ -36,6 +36,15 @@ struct keypress_data get_keypress(){
 	return(tmp);
 }
 
+bool is_ascii(uint8_t code){
+	uint8_t tmp = get_ascii(code);
+	return(tmp != 0 && (tmp>>7) == 0);
+}
+
+char get_ascii(uint8_t code){
+	return(ascii_id_lookup_table[code]);
+}
+
 void block_wait_keyboard_read(){
 	while(!(bytein(0x64)&1)){
 	}

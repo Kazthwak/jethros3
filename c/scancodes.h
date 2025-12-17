@@ -128,13 +128,307 @@
 #define KEY_KP_SUB 		0b10101001
 #define KEY_KP_ADD 		0b10101010
 #define KEY_KP_ENTER 	0b10101100
-
+//22 gaps
+//from line 4 to 130
+//therfore 127 lines -22 gaps = 105 chars
 
 #define KEY_INVALID		0b11111111
 
 
 
 //A VERY :ARGE TABLE THAT CAN BE USED TO TRANSLATE SET 3 SCANCODES INTO UNIQUE IDs
+
+char ascii_id_lookup_table[] = {
+	0,  //escape
+	'`',  //tilde
+	0,  //tab
+	0,  //caps
+	0,  //shift
+	0,  //ctrl
+	0,  //nothing
+	0,  //nothing
+
+	0,  //nothing
+	'1',  //1
+	'q',  //q
+	'a',  //a
+	'\\',  //\   asd 
+	0,  //super
+	0,  //nothing
+	0,  //nothing
+
+	0,  //F1
+	'2',  //2
+	'w',  //w
+	's',  //s
+	'z',  //z
+	0,  //alt
+	0,  //nothing
+	0,  //nothing
+
+	0,  //F2
+	'3',  //3
+	'e',  //e
+	'd',  //d
+	'x',  //x
+	' ',  //space
+	0,  //nothing
+	0,  //nothing
+
+	0,  //F3
+	'4',  //4
+	'r',  //r
+	'f',  //f
+	'c',  //c
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+
+	0,  //F4
+	'5',  //5
+	't',  //t
+	'g',  //g
+	'v',  //v
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+
+	0,  //nothing
+	'6',  //6
+	'y',  //y
+	'h',  //h
+	'b',  //b
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+
+	0,  //f5
+	'7',  //7
+	'u',  //u
+	'j',  //j
+	'n',  //n
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+
+	0,  //f6
+	'8',  //8
+	'i',  //i
+	'k',  //k
+	'm',  //m
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+
+	0,  //f7
+	'9',  //9
+	'O',  //o
+	'l',  //l
+	',',  //,
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+
+	0,  //f8
+	'0',  //0
+	'p',  //p
+	';',  //;
+	'.',  //.
+	0,  //alt
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //f9
+	'-',  //-
+	'[',  //[
+	'\'',  //'
+	0x2F,  ///
+	0,  //FN
+	0,  //nothing
+	0,  //nothing
+
+	0,  //f10
+	'=',  //=
+	']',  //]
+	'#',  //#
+	0,  //Right Click
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //f11
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+
+	0,  //f12
+	0x88,  //backspace
+	'\n' | 0x80,  //enter
+	0,  //nothing
+	0,  //RIght Shift
+	0,  //Right Ctrl
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //Print Screen
+	0,  //insert
+	0,  //delete
+	0x84,  //left_arrow
+	0,  //Nothing
+	0,  //Nothing
+	0,  //Nothing
+	0,  //Nothing
+
+	0,  //Sroll lock
+	0,  //Home
+	0,  //End
+	0x81,  //Up arrow
+	0x83,  //Down Arrow
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //Pause
+	0,  //Page up
+	0,  //Page down
+	0x82,  //Right arrow
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	//numlock stuff
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+};
 
 uint8_t scancode_lookup_table[] = {
 	KEY_INVALID,	//00 nothing
@@ -209,7 +503,7 @@ uint8_t scancode_lookup_table[] = {
 	KEY_COMMA,	//41 ,
 	KEY_k,	//42 k
 	KEY_i,	//43 i
-	KEY_q,	//44 q
+	KEY_o,	//44 o
 	KEY_0,	//45 0
 	KEY_9,	//46 9
 	KEY_F9,	//47 F9

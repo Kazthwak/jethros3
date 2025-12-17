@@ -11,6 +11,9 @@
 #include "c/mem.c"
 #include "c/malloc.c"
 #include "c/disc.c"
+#include "c/syscall.c"
+#include "c/shell.c"
+#include "c/load_prog.c"
 
 //external includes
 //#include "filesystem/source/ff.c"

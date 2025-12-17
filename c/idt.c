@@ -33,6 +33,7 @@ void idt_init(){
 	set_idt_entry(29, (uint32_t)isr29, 0x08, 0x8e);
 	set_idt_entry(30, (uint32_t)isr30, 0x08, 0x8e);
 	set_idt_entry(31, (uint32_t)isr31, 0x08, 0x8e);
+		
 	idtr.base = (uint32_t)&idt_table;
 	idtr.len = sizeof(idt_table)-1;
 	idtr_load();

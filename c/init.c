@@ -85,13 +85,6 @@ void kernel_init(){
 	print_string("Keyboard initialised\n");
 	mono_disc_init();
 	print_string("Disc controller initialised\n");
-	print_string("Special thanks to:\nDr Edwall - For getting me through my English GCSEs\nDr Kerney - ");
-	print_string("For getting me through my History GCSE\nMrs Robinson - For getting me through my Biology ");
-	print_string("GCSE\nMr Coakes - For getting me though my D&T GCSE\n");
-	print_string("Herr Drozdov - for getting me through my German GCSE\n");
-	print_string("Please don't be offended if you taught me and are not on this list. It means that I ");
-	print_string("Liked your subject before being taught it, and therefore didn't need as much help from you. ");
-	print_string("My results therefore do not show your (existant) teaching prowess");
 	print_string("\nBoot completed. Press any key to continue.");
 	clear_keyboard_buffer();
 	while(!is_key_waiting());
