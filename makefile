@@ -7,7 +7,7 @@ run: jethros.img
 	@qemu-system-x86_64 -drive format=raw,file=jethros.img,media=disk -boot menu=off -serial file:serial.log -m 1G \
 	-drive if=pflash,format=raw,readonly=on,file=./grub_files/OVMF_CODE.4m.fd -drive if=pflash,format=raw,file=./grub_files/OVMF_VARS.4m.fd
 
-jethros.img: jethros.bin BOOTX64.EFI makefile
+jethros.img: jethros.bin BOOTX64.EFI makefile test_program
 	@cp jethros.bin ./disc/boot/jethr.os
 	@dd if=/dev/zero of=jethros.img bs=1M count=64
 	@parted jethros.img --script mklabel gpt mkpart ESP fat32 1MiB 100% set 1 esp on
@@ -16,6 +16,10 @@ jethros.img: jethros.bin BOOTX64.EFI makefile
 	@mdir -i jethros.img@@1048576 ::/EFI/BOOT >/dev/null 2>&1 || mmd -i jethros.img@@1048576 ::/EFI/BOOT
 	@mcopy -i jethros.img@@1048576 BOOTX64.EFI ::/EFI/BOOT/
 	@mcopy -i jethros.img@@1048576 -s ./disc/* ::
+
+test_program: test_program.asm
+	@nasm test_program.asm
+	@cp test_program disc
 
 BOOTX64.EFI: grub_files/* makefile
 	@grub-mkstandalone -O x86_64-efi -o BOOTX64.EFI --modules="part_gpt fat normal configfile linux multiboot efi_gop efi_uga multiboot2" "boot/grub/grub.cfg=grub_files/grub.cfg"
@@ -26,7 +30,7 @@ kernel_asm.o: kernel.asm
 boot.o: boot.asm
 	@nasm boot.asm -o boot.o -f elf32
 
-kernel.o: kernel.c kernel.h c/IO.c c/graphics.c c/gdt.c c/idt.c c/interrupts.c c/utils.c c/keyboard.c c/time.c c/debug.c c/load_prog.c \
+kernel.o: kernel.c kernel.h c/IO.c c/graphics.c c/gdt.c c/idt.c c/interrupts.c c/utils.c c/keyboard.c c/time.c c/debug.c c/load_prog.c c/tss.c \
 c/text.c c/init.c c/mem.c c/font.h c/disc.c c/time.c c/scancodes.h c/malloc.c c/disc.h makefile c/vector.h lib/string-code.h lib/stdlib-code.h c/syscall.c c/shell.c
 	@~/opt/cross/bin/i686-elf-gcc -c kernel.c -o kernel.o -ffreestanding -O3 -nostdlib -lgcc -Wall -Wextra -IFAT
 	@#-std=gnu99 -Wall -Wextra

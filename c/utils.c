@@ -1,4 +1,15 @@
 #include "../kernel.h"
+
+uint32_t pow(uint32_t base, uint32_t exponent){
+	if(exponent == 0){return(1);}
+	if(exponent%2 == 0){
+		return(pow(base*base, exponent/2));
+	}
+	else{
+		return(base*pow(base*base, (exponent-1)/2));
+	}
+}
+
 /*
 //copy from start to dest
 void memcpy(void* dest, void* start, uint32_t length){

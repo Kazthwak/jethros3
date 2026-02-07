@@ -1,10 +1,13 @@
 #include "../kernel.h"
 
 void shell(){
-	
 	clear_screen();
 	print_string(version  " SHELL\nTYPE COMMAND");
+	set_flick(true);
 	while(1){
+		char buffer[128] = {0};
+		uint8_t buffer_next = 1;
+		buffer[0] = '/';
 		newline();
 		print_string(">");
 		uint16_t begx = cursor_x;
@@ -22,10 +25,20 @@ void shell(){
 					cursor_x--;
 				}
 				putcharxyc(cursor_x, cursor_y, 0x0);
+				putcharxyc(cursor_x+1, cursor_y, 0x0);
+				if(buffer_next >= 1){
+					buffer_next--;
+					buffer[buffer_next] = 0;
+				}
 			}
 			if(is_ascii(keyd.code)){
+				buffer[buffer_next] = get_ascii(keyd.code);
+				buffer_next++;
 				putchar(get_ascii(keyd.code));
 			}
 		}
+		newline();
+		uint8_t tmp = load_program_and_execute(buffer);
+		hexbyte(tmp);
 	}
 }

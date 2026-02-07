@@ -48,6 +48,21 @@ inton:
 	sti
 	ret
 
+global run_prog
+run_prog:
+	push ebp
+	mov ebp, esp
+	;sub esp, 0 ;make space on the stack for variables
+	mov eax, [ebp+8]
+	;do stuff
+	pusha
+	call eax
+	popa
+	
+	leave ;clear up stack fram
+	ret
+
+
 extern test_var
 global testing
 testing:

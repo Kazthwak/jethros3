@@ -296,6 +296,8 @@ struct kmalloc_link{
 	uint32_t length;
 }__attribute__((packed));
 
+// struct x
+
 //--------global variables
 
 //4 KB
@@ -372,6 +374,7 @@ void hexword(uint16_t num);
 void hexdword(uint32_t num);
 void hexqword(uint64_t num);
 void binbyte(uint8_t num);
+void binword(uint16_t num);
 bool disc_poll_ATA_PIO(void);
 bool disc_read_ATA_PIO(volatile struct disc_sector* sector_address, uint32_t LBA);
 void wordout(uint32_t port, uint16_t data);
@@ -399,9 +402,9 @@ void block_wait_keyboard_write(void);
 bool is_key_waiting(void);
 struct keypress_data get_keypress(void);
 void clear_keyboard_buffer(void);
-uint32_t kmalloc_permanant(uint32_t length);
+uint32_t kmalloc_permanent(uint32_t length);
 bool alloc_and_map_page(uint32_t virt_addr);
-uint32_t kmalloc_permanant_page(void);
+uint32_t kmalloc_permanent_page(void);
 void init_mem_late(void);
 void dump_mem(uint32_t start, uint32_t length);
 void mono_disc_init(void);
@@ -419,4 +422,11 @@ int abstracted_disc_part_read(uint32_t sector, uint8_t* buffer, uint32_t sector_
 void int0x30handle(struct regs* r);
 void shell(void);
 char get_ascii(uint8_t code);
+int load_program_and_execute(char* name);
+extern void run_prog(void* address);
+void set_flick(bool state);
+void fixed_decimal(uint16_t num);
+void cust_fixed_decimal(uint16_t num, uint8_t digs);
+uint32_t pow(uint32_t base, uint32_t exponent);
+void print_decimal(uint32_t num);
 #endif

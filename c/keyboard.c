@@ -2,6 +2,8 @@
 
 // #define BAD_KEYBOARD
 
+bool shifted = false;
+
 void keyboard_handle(__attribute__((unused)) struct regs* r){
 static struct keypress_data key_data = {true, 0};
 uint8_t data = bytein(0x60);
@@ -33,6 +35,9 @@ struct keypress_data get_keypress(){
 	if(key_buffer_pointer_bottom == key_buffer_pointer_top){return((struct keypress_data){false, 0xff});}
 	struct keypress_data tmp = key_buffer[key_buffer_pointer_bottom];
 	key_buffer_pointer_bottom = (key_buffer_pointer_bottom+1)%KEY_BUFFER_LENGTH;
+	if(tmp.code == KEY_SHIFT_L){
+		shifted = tmp.pressed;
+	}
 	return(tmp);
 }
 
@@ -42,7 +47,10 @@ bool is_ascii(uint8_t code){
 }
 
 char get_ascii(uint8_t code){
-	return(ascii_id_lookup_table[code]);
+	if(!shifted){
+		return(ascii_id_lookup_table[code]);
+	}
+	return(caps_lookup_table[ascii_id_lookup_table[code]]);
 }
 
 void block_wait_keyboard_read(){

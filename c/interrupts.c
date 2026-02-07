@@ -7,11 +7,10 @@ void fault_handler(struct regs* r){
 		if((r->err_code&1) == 0){
 			//was not in user mode
 			if(((r->err_code>>2)&1) == 0){
-				newline();
 				uint32_t address;
 				asm volatile("mov %%cr2, %%eax" : "=a" (address):);
 				uint32_t page_address = address&0xfffff000;
-				//check if address is near a boandary. I am checking an excessive amount to avoid errors
+				//check if address is near a boandary. I am checking an excessive amount to avoid errors. ----- WHY ON EARTH DID YOU PICK 0x11 BYTES????????? QUITE RANDOM
 				bool extra_page_needed = ((address+0x11)&0xfffff000) > page_address;
 				//check if page already mapped
 				uint32_t next_page_address = (((page_address>>12)+1)<<12);

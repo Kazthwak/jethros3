@@ -1,6 +1,7 @@
 #include "c/IO.c"
 #include "c/graphics.c"
 #include "c/gdt.c"
+#include "c/tss.c"
 #include "c/idt.c"
 #include "c/interrupts.c"
 #include "c/keyboard.c"

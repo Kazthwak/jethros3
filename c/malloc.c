@@ -2,7 +2,7 @@
 
 
 void k_heap_allocator_init(void){
-	heap_start = kmalloc_permanant(HEAP_SIZE);
+	heap_start = kmalloc_permanent(HEAP_SIZE);
 	struct kmalloc_link* first_link = (struct kmalloc_link*)heap_start;
 	first_heap_block = (uint32_t)first_link;
 	first_link->length = HEAP_SIZE;

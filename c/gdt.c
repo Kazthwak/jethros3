@@ -21,7 +21,7 @@ void gdt_set_entry(uint8_t entry, uint32_t base, uint32_t limit, uint8_t access,
 
 #define user_code_access 0xFA
 #define user_code_gran 0xCF
-#define user_data_access 0xFA
+#define user_data_access 0xF2
 #define user_data_gran 0xCF
 
 void gdt_init(){

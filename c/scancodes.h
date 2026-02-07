@@ -135,8 +135,7 @@
 #define KEY_INVALID		0b11111111
 
 
-
-//A VERY :ARGE TABLE THAT CAN BE USED TO TRANSLATE SET 3 SCANCODES INTO UNIQUE IDs
+// #define FREE_UNDERSCORE
 
 char ascii_id_lookup_table[] = {
 	0,  //escape
@@ -222,7 +221,7 @@ char ascii_id_lookup_table[] = {
 
 	0,  //f7
 	'9',  //9
-	'O',  //o
+	'o',  //o
 	'l',  //l
 	',',  //,
 	0,  //nothing
@@ -239,7 +238,11 @@ char ascii_id_lookup_table[] = {
 	0,  //nothing
 	
 	0,  //f9
+#ifndef FREE_UNDERSCORE
 	'-',  //-
+#else
+	'_', //_ so that it can be typed with no shift
+#endif
 	'[',  //[
 	'\'',  //'
 	0x2F,  ///
@@ -430,6 +433,9 @@ char ascii_id_lookup_table[] = {
 	0,  //nothing
 };
 
+//A VERY lARGE TABLE THAT CAN BE USED TO TRANSLATE SET 3 SCANCODES INTO UNIQUE IDs
+
+
 uint8_t scancode_lookup_table[] = {
 	KEY_INVALID,	//00 nothing
 	KEY_INVALID,	//01 nothing
@@ -601,4 +607,150 @@ uint8_t scancode_lookup_table[] = {
 	KEY_INVALID,	//0E
 	KEY_INVALID,	//0F
 */
+};
+
+uint8_t caps_lookup_table[] = {
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	0,  //nothing
+	
+	0,  //nothing
+	0,  //!
+	0,  //"
+	0,  //#
+	0,  //$
+	0,  //%
+	0,  //&
+	0,  //'
+
+	0,  //(
+	0,  //)
+	0,  //*
+	0,  //+
+	0,  //,
+	'_',  //-
+	0,  //.
+	0,  ///
+
+	')',  //0
+	'!',  //1
+	'"',  //2
+	'£',  //3
+	'$',  //4
+	'%',  //5
+	'^',  //6
+	'&',  //7
+
+	'*',  //8
+	'(',  //9
+	0,  //:
+	':',  //;
+	0,  //<
+	'+',  //=
+	0,  //>
+	0,  //?
+
+	0,  //@
+	0,  //A
+	0,  //B
+	0,  //C
+	0,  //D
+	0,  //E
+	0,  //F
+	0,  //G
+
+	0,  //H
+	0,  //I
+	0,  //J
+	0,  //K
+	0,  //L
+	0,  //M
+	0,  //N
+	0,  //O
+
+	0,  //P
+	0,  //Q
+	0,  //R
+	0,  //S
+	0,  //T
+	0,  //U
+	0,  //V
+	0,  //W
+
+	0,  //X
+	0,  //Y
+	0,  //Z
+	0,  //[
+	0,  //\ asd
+	0,  //]
+	0,  //^
+	0,  //_
+
+	0,  //`
+	'A',  //a
+	'B',  //b
+	'C',  //c
+	'D',  //d
+	'E',  //e
+	'F',  //f
+	'G',  //g
+
+	'H',  //h
+	'I',  //i
+	'J',  //j
+	'K',  //k
+	'L',  //l
+	'M',  //m
+	'N',  //n
+	'O',  //o
+
+	'P',  //p
+	'Q',  //q
+	'R',  //r
+	'S',  //s
+	'T',  //t
+	'U',  //u
+	'V',  //v
+	'W',  //w
+
+	'X',  //x
+	'Y',  //y
+	'Z',  //z
+	0,  //{
+	0,  //|
+	0,  //}
+	0,  //~
+	0,  //del
 };

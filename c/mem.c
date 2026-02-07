@@ -7,6 +7,8 @@
 //functions needed:
 
 
+uint32_t page_table_0[1024] __attribute__((aligned(4096))) = {0};
+
 void* phys_mem_pokage;
 uint32_t phys_mem_pokage_last_base = 0xffffffff;
 
@@ -21,26 +23,31 @@ void mem_init(){
 	page_tables[768] = &page_table_kernel_1;
 	page_tables[769] = &page_table_kernel_2;
 	page_tables[770] = &page_table_kernel_3;
+	
 	init_phys_pages();
 	next_free_kernel_mem = (uint32_t)end_of_used_ram;
 	//align it to the next page boundary
 	next_free_kernel_mem >>= 12;
 	next_free_kernel_mem++;
 	next_free_kernel_mem <<= 12;
-	phys_mem_pokage = (void*)kmalloc_permanant_page();
+	phys_mem_pokage = (void*)kmalloc_permanent_page();
 }
 
 void init_mem_late(){
 	//create new page tables
 	for(uint16_t i = 771; i < 1024; i++){
 		//allocate a page table
-		uint32_t* page_table = (uint32_t*)kmalloc_permanant_page();
+		uint32_t* page_table = (uint32_t*)kmalloc_permanent_page();
 		//fill with 0
 		memset(page_table, 0x0, page_size);
 		//put it in the page directory and the page table list
 		page_tables[i] = page_table;
 		page_directory[i] = get_phys_address((uint32_t)page_table) | 3;
 	}
+	
+	page_tables[0] = page_table_0;	
+	page_directory[0] = get_phys_address((uint32_t)page_table_0) | 3;
+	
 	k_heap_allocator_init();
 }
 
@@ -204,14 +211,14 @@ void poke_phys_address(uint32_t address, uint32_t value){
 
 
 //returns a pointer to the next {length} bytes after the last used piece of kernel memory
-uint32_t kmalloc_permanant(uint32_t length){
+uint32_t kmalloc_permanent(uint32_t length){
 	uint32_t start = next_free_kernel_mem;
 	uint32_t end = start+length-1; //last used byte
 	next_free_kernel_mem = end+1; //first byte after, the next free byte
 	return(start);
 }
 
-uint32_t kmalloc_permanant_page(){
+uint32_t kmalloc_permanent_page(){
 	uint32_t start = next_free_kernel_mem;
 	if(start != (start&0xfffff000)){
 	start >>= 12;

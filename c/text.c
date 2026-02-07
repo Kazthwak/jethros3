@@ -61,3 +61,36 @@ void binbyte(uint8_t num){
 		putchar(0x30+((num>>i)&1));
 	}
 }
+
+void binword(uint16_t num){
+	binbyte(num>>8);
+	binbyte(num&0xff);
+}
+
+void fixed_decimal(uint16_t num){
+	for(uint8_t i = 5; i > 0; i--){
+		uint32_t tmp = pow(10, i);
+		hexdig((num%tmp)*10/tmp);
+	}
+}
+
+void cust_fixed_decimal(uint16_t num, uint8_t digs){
+	for(uint8_t i = digs; i > 0; i--){
+		uint32_t tmp = pow(10, i);
+		hexdig((num%tmp)*10/tmp);
+	}
+}
+
+void print_decimal(uint32_t num){
+	uint8_t digs = 1;
+	uint32_t tmp = num;
+	while(1){
+		tmp /= 10;
+		if(tmp == 0){break;}
+		digs += 1;
+	}
+	for(uint8_t i = digs; i > 0; i--){
+		uint32_t tmp = pow(10, i);
+		hexdig((num%tmp)*10/tmp);
+	}
+}
