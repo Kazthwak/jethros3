@@ -50,7 +50,7 @@ char get_ascii(uint8_t code){
 	if(!shifted){
 		return(ascii_id_lookup_table[code]);
 	}
-	return(caps_lookup_table[ascii_id_lookup_table[code]]);
+	return(caps_lookup_table[(uint8_t)ascii_id_lookup_table[code]]);
 }
 
 void block_wait_keyboard_read(){

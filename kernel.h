@@ -1,6 +1,6 @@
 #ifndef HEADER_GUARD
 #define HEADER_GUARD
-#define version "JETHROS3 Version 0.2"
+#define version "JETHROS3 Version 0.4"
 #define DEBUG_BUILD
 //--------includes
 #include <stdint.h>
@@ -10,6 +10,7 @@
 #include "c/font.h"
 #include "c/scancodes.h"
 #include "c/vector.h"
+#include "c/task.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -23,7 +24,7 @@
 
 //--------constants
 //gdt
-#define gdt_len 5
+#define gdt_len 6
 //for fixing janky pointers
 #define PAGING_OFFSET 0xc0000000
 //memory/paging
@@ -61,6 +62,9 @@ extern void* page_table_kernel_2;
 extern void* page_table_kernel_3;
 volatile uint32_t test_var;
 
+extern void* stack_top;
+extern void* stack_bottom;
+
 extern void hang(void);
 extern void hang_int(void);
 void gdtr_load(void);
@@ -68,7 +72,9 @@ void idtr_load(void);
 void gdt_load(void);
 extern void page_reload(void);
 extern void inton(void);
+extern void intoff(void);
 extern void testing(void);
+extern void flush_tss(void);
 
 extern void isr0(void);
 extern void isr1(void);
@@ -265,7 +271,6 @@ struct fat_time{
 	uint16_t creation_date;
 }__attribute((packed));
 
-
 struct fat_8_3_entry{
 char     name[8];
 char     ext[3];
@@ -429,4 +434,10 @@ void fixed_decimal(uint16_t num);
 void cust_fixed_decimal(uint16_t num, uint8_t digs);
 uint32_t pow(uint32_t base, uint32_t exponent);
 void print_decimal(uint32_t num);
+void init_tss(void);
+int update_tss_stack_ptr(uint32_t base, uint32_t addr);
+void tss_init_late(void);
+bool new_page_table(uint16_t num);
+extern void asm_iret(uint32_t address, uint32_t stack);
+void iret_to_address(uint32_t addr, uint32_t stack);
 #endif

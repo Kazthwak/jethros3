@@ -33,9 +33,26 @@ void mem_init(){
 	phys_mem_pokage = (void*)kmalloc_permanent_page();
 }
 
+bool new_page_table(uint16_t num){
+	//allocate a page table
+	uint32_t* page_table = (uint32_t*)kmalloc_permanent_page();
+	//fill with 0
+	memset(page_table, 0x0, page_size);
+	//put it in the page directory and the page table list
+	page_tables[num] = page_table;
+	uint8_t flags = 0b11;
+	if(num < 768){
+		//user page table
+		flags |= 0b100;
+	}
+	page_directory[num] = get_phys_address((uint32_t)page_table) | flags;
+	return(true);
+}
+
 void init_mem_late(){
 	//create new page tables
 	for(uint16_t i = 771; i < 1024; i++){
+		/*
 		//allocate a page table
 		uint32_t* page_table = (uint32_t*)kmalloc_permanent_page();
 		//fill with 0
@@ -43,6 +60,10 @@ void init_mem_late(){
 		//put it in the page directory and the page table list
 		page_tables[i] = page_table;
 		page_directory[i] = get_phys_address((uint32_t)page_table) | 3;
+		//*/  if(!new_page_table(i)){
+			print_string("PAGE TABLE ALLOCATION FAILED");
+			hang();
+		}
 	}
 	
 	page_tables[0] = page_table_0;	
@@ -55,7 +76,7 @@ void init_mem_late(){
 //I am being conservative to ensure no memory-mapped memory is used
 uint8_t init_page_valid(uint32_t mem_addr){
 	//end of page is after start of OS and start of page is before end of OS
-	//means page includes OS image. May malfunction if the OS image is less than 1 page in size
+	//means page includes OS image. May malfunction if the OS image is less than 1 page in size (not a problem)
 	if((mem_addr+page_size) >= (uint32_t)beg_of_used_ram && mem_addr <= (uint32_t)end_of_used_ram){
 		return(0);
 	}
@@ -141,6 +162,8 @@ uint32_t get_phys_address(uint32_t address){
 	return(tmp+offset);
 }
 
+bool recurred = false;
+
 void map_page(uint32_t phys_addr, uint32_t virt_addr){
 	uint16_t dir_entry;
 	uint16_t table_entry;
@@ -151,10 +174,21 @@ void map_page(uint32_t phys_addr, uint32_t virt_addr){
 	uint32_t* page_table = (uint32_t*)page_tables[dir_entry];
 	//check if no page table present
 	if(page_table == 0){
-		print_string("No page table present for this virtual address.\n");
-		hang();
+		if(recurred == true || !new_page_table(dir_entry)){
+			print_string("No page table present for this virtual address. and allocation failed\n");
+			hang();
+		}
+		recurred = true;
+		map_page(phys_addr, virt_addr);
+		recurred = false;
+		return;
 	}
-	page_table[table_entry] = phys_addr | 0b11;
+	uint8_t flags = 0b11;
+	if(virt_addr < 0xc0000000){
+		//user space
+		flags |= 0b100; //set to user accesible
+	}
+	page_table[table_entry] = phys_addr | flags;
 }
 
 bool alloc_and_map_page(uint32_t virt_addr){

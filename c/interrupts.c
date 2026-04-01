@@ -10,6 +10,10 @@ void fault_handler(struct regs* r){
 				uint32_t address;
 				asm volatile("mov %%cr2, %%eax" : "=a" (address):);
 				uint32_t page_address = address&0xfffff000;
+				if(page_address < 0xc0000000){
+					print_string("NON KERNEL MEMORY USED UNMAPPED. ERROR");
+					hang();
+				}
 				//check if address is near a boandary. I am checking an excessive amount to avoid errors. ----- WHY ON EARTH DID YOU PICK 0x11 BYTES????????? QUITE RANDOM
 				bool extra_page_needed = ((address+0x11)&0xfffff000) > page_address;
 				//check if page already mapped
@@ -53,7 +57,7 @@ void irq_init(){
 	set_idt_entry(45, (uint32_t)irq13, 0x08, 0x8e);
 	set_idt_entry(46, (uint32_t)irq14, 0x08, 0x8e);
 	set_idt_entry(47, (uint32_t)irq15, 0x08, 0x8e);
-	set_idt_entry(0x30, (uint32_t)irq16, 0x08, 0x8e);
+	set_idt_entry(0x30, (uint32_t)irq16, 0x08, 0xEe); //flags allow for ring3 access
 
 	pic_remap();
 	for(uint8_t i = 0; i <16; i++){IRQ_set_mask(i);}

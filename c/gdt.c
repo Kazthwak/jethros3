@@ -36,9 +36,11 @@ void gdt_init(){
 	gdt_set_entry(3, 0x0, 0xffffffff, user_code_access, user_code_gran);
 	//user data
 	gdt_set_entry(4, 0x0, 0xffffffff, user_data_access, user_data_gran);
+	init_tss();
 	gdtr.base = (uint32_t)&gdt;
 	gdtr.limit = (8*gdt_len)-1;
 	gdtr_load();
 	gdt_load();
+	tss_init_late();
 	//MUST BE DONE AFTER INSTALLING GDT
 }

@@ -15,6 +15,7 @@
 #include "c/syscall.c"
 #include "c/shell.c"
 #include "c/load_prog.c"
+#include "c/task_switch.c"
 
 //external includes
 //#include "filesystem/source/ff.c"

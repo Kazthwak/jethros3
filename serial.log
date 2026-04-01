@@ -3,7 +3,7 @@ BdsDxe: starting Boot0001 "UEFI QEMU HARDDISK QM00001 " from PciRoot(0x0)/Pci(0x
 error: fs/fshelp.c:find_file:260:file `//x86_64-efi/echo.mod' not found.
 error: fs/fshelp.c:find_file:260:file `//x86_64-efi/ls.mod' not found.
 error: fs/fshelp.c:find_file:260:file `//x86_64-efi/ls.mod' not found.
-[0m[30m[40m[2J[01;01H[0m[37m[40m[02;29HGNU GRUB  version 2:2.14rc1.r54.g29f3131a-2
+[0m[30m[40m[2J[01;01H[0m[37m[40m[02;38HGNU GRUB  version 2:2.14-1
 
 [04;02H┌────────────────────────────────────────────────────────────────────────────────────────────────┐[05;02H│[05;99H│[06;02H│[06;99H│[07;02H│[07;99H│[08;02H│[08;99H│[09;02H│[09;99H│[10;02H│[10;99H│[11;02H│[11;99H│[12;02H│[12;99H│[13;02H│[13;99H│[14;02H│[14;99H│[15;02H│[15;99H│[16;02H│[16;99H│[17;02H│[17;99H│[18;02H│[18;99H│[19;02H│[19;99H│[20;02H│[20;99H│[21;02H│[21;99H│[22;02H│[22;99H│[23;02H│[23;99H│[24;02H└────────────────────────────────────────────────────────────────────────────────────────────────┘[25;02H[26;02H     Use the ▲ and ▼ keys to select which entry is highlighted.                              
       Press enter to boot the selected OS, `e' to edit the commands before booting or `c' for 

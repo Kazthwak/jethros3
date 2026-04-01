@@ -98,7 +98,7 @@ _start:
 		mov eax, (page_table_kernel_1 - BEG_OFFSET)
 		or eax, 0b11
 		mov [page_directory_asm - BEG_OFFSET], eax
-		;whichever Genius came up with the idea to mape the page table in twice, deserves a nobel prize
+ 		;whichever Genius came up with the idea to mape the page table in twice, deserves a nobel prize. Looking back, its not actually quite that clever
 		mov [page_directory_asm - BEG_OFFSET + (768 * 4)], eax
 		;the second page table
 		mov eax, (page_table_kernel_2 - BEG_OFFSET)

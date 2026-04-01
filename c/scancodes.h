@@ -667,7 +667,7 @@ uint8_t caps_lookup_table[] = {
 	')',  //0
 	'!',  //1
 	'"',  //2
-	'£',  //3
+	0xA3,  //3 (Apparently this is the Latin code for £)
 	'$',  //4
 	'%',  //5
 	'^',  //6

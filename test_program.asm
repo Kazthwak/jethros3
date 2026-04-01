@@ -1,6 +1,12 @@
 [bits 32]
-[org 0x400]
 
+global _start
+_start:
+
+;cheating by making my own stack
+mov esp, top
+
+; jmp hang
 mov eax, 0
 mov ah, 4
 mov ebx, 0
@@ -16,7 +22,6 @@ int 0x30
 
 mov ecx, 0
 push ecx
-
 
 
 
@@ -66,6 +71,10 @@ ret
 
 hang:
 jmp hang
+
+btm:
+resb 128
+top:
 
 str:
 db "Welcome to ---GARBAGE CLICKER---",0x0a, "Pressing any key will increment your score by one", 0
