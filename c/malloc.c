@@ -50,7 +50,7 @@ void* kmalloc(uint32_t length){
 }
 
 
-//coalescing could be merged with new link creation, to avoid unecassary overhead, but this is too minimal a performance imrpovement for the effort
+//coalescing could be merged with new link creation, to avoid unecassary overhead, but this is too minimal a performance imrpovement for the effort currently
 void kfree(void* address){
 	//work out the true address of the struct
 	uint32_t true_address = (uint32_t)address - sizeof(struct alloc_tmp_str);

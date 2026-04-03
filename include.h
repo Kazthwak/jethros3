@@ -16,6 +16,9 @@
 #include "c/shell.c"
 #include "c/load_prog.c"
 #include "c/task_switch.c"
+#include "c/schedule.c"
+
+
 
 //external includes
 //#include "filesystem/source/ff.c"

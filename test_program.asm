@@ -3,10 +3,11 @@
 global _start
 _start:
 
-;cheating by making my own stack
-mov esp, top
 
-; jmp hang
+;cheating by making my own stack
+;mov edx, esp
+;mov esp, top
+
 mov eax, 0
 mov ah, 4
 mov ebx, 0
@@ -50,6 +51,8 @@ print:
 call clear_screen	
 pop ecx
 mov ebx, ecx
+;debug info print
+;mov ebx, esp
 mov eax, 0
 mov ah, 5
 mov al, 7
@@ -72,9 +75,9 @@ ret
 hang:
 jmp hang
 
-btm:
-resb 128
-top:
+;btm:
+;resb 512
+;top:
 
 str:
 db "Welcome to ---GARBAGE CLICKER---",0x0a, "Pressing any key will increment your score by one", 0

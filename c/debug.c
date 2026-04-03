@@ -6,7 +6,14 @@ void dump_mem(uint32_t start, uint32_t length){
 		hexbyte(*(uint8_t*)(i+start)); space();
 		byteout(0x3f8, *(uint8_t*)(i+start));
 	}
-	hang();
+}
+
+void dump_vector(vector* target){
+	for(uint32_t i = 0; i < target->length; i++){
+		hexdword(target->data[i]); print_string(" ");
+		if(i%8 == 0){newline();}
+		else if(i%2 == 0){print_string(" ");}
+	}
 }
 
 void test_keyboard(){

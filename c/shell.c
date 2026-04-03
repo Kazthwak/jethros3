@@ -2,6 +2,7 @@
 
 void shell(){
 	clear_screen();
+	print_string(ART_TITLE); newline();
 	print_string(version  " SHELL\nTYPE COMMAND");
 	set_flick(true);
 	while(1){
@@ -39,6 +40,13 @@ void shell(){
 		}
 		newline();
 		uint8_t tmp = load_program_and_execute(buffer);
+		/*newline();
+		hexdword(tasks->length); newline();
+		hexdword(((struct task_data*)tasks->data[0])->id); newline();
+		hexdword(((struct task_data*)tasks->data[0])->instruction_pointer); newline();
+		hexdword(((struct task_data*)tasks->data[0])->stack_pointer); newline();
+		hexdword(((struct task_data*)tasks->data[0])->kernel_stack_pointer); newline();
+		hang();*/
 		hexbyte(tmp);
 	}
 }

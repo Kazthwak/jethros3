@@ -143,6 +143,17 @@ void* alloc_phys_page(uint32_t start_addr){
 	return((void*)0xffffffff);
 }
 
+void dealloc_phys_page(uint32_t phys_addr){
+	if(phys_addr%page_size != 0){
+		print_string("ERROR UNALIGNED DEALLOC_PHYS_PAGE");
+		return;
+	}
+	uint16_t ind = phys_addr/32/page_size;
+	uint8_t off = (phys_addr/page_size)%32;
+	phys_page_state[ind] |= (1 << off);
+}
+
+
 uint32_t get_phys_address(uint32_t address){
 	uint16_t dir_entry;
 	uint16_t table_entry;
@@ -161,6 +172,19 @@ uint32_t get_phys_address(uint32_t address){
 		uint32_t tmp = (table_entry_data>>12)<<12;
 	return(tmp+offset);
 }
+
+
+//unmap the page but do not mark the physical memory as free - only remove the page from the page structures
+void unmap_page(uint32_t virt_addr){
+	uint16_t dir_entry = virt_addr>>22;
+	uint16_t table_entry = (virt_addr>>12)&0b1111111111;
+	uint32_t* page_table = (uint32_t*)page_tables[dir_entry];
+	if(page_table == 0){
+		print_string("ERROR. UNABLE TO DEALLOCATE PAGE BECAUSE NO PAGE TABLE PRESENT");
+	}
+	page_table[table_entry] = 0;
+}
+
 
 bool recurred = false;
 

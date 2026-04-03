@@ -31,7 +31,9 @@ vector* resize_vector(vector* target_vector, uint32_t new_size){
 }
 
 void destroy_vector(vector* target_vector){
-	kfree(target_vector);
+	if(target_vector != 0){
+		kfree(target_vector);
+	}
 }
 
 void vector_init(void){

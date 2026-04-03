@@ -114,6 +114,7 @@ irqn 16
 extern irq_handler
 
 irq_common_stub:
+	cli
     pusha
     push ds
     push es

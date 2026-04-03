@@ -1,13 +1,8 @@
-Memory allocator
-A heap allocator that works, and a variable-length array system
-
-
-Change disc format to use a single FAT32 drive that is booted from, rather than having 2 drives that the os needs to have in.
-proper keyboard scancodes
-filesystem support
-program loading
-system calls
-usermode
+Add checks to ELF values
+Make page-flushing more streamlined.
+C library
+OS-Specific toolchain
+ArgvArgC
 security
 kernel is un-pre-emptable
 Check what the filesystem is

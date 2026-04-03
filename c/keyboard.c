@@ -5,26 +5,31 @@
 bool shifted = false;
 
 void keyboard_handle(__attribute__((unused)) struct regs* r){
-static struct keypress_data key_data = {true, 0};
-uint8_t data = bytein(0x60);
-//check if it was a 0xf0 to mean the key was released
-if(data == 0xf0){
-	key_data.pressed = false;
-	return;
-}
-#ifdef BAD_KEYBOARD
-key_data.code = data;
-#else
-key_data.code = scancode_lookup_table[data];
-#endif
-if((key_buffer_pointer_top+1)%KEY_BUFFER_LENGTH == key_buffer_pointer_bottom){
-	return;
-	//buffer "full"
-}
-//put in the buffer
-key_buffer[key_buffer_pointer_top] = key_data;
-key_buffer_pointer_top = (key_buffer_pointer_top+1)%KEY_BUFFER_LENGTH;
-key_data.pressed = true;
+	static struct keypress_data key_data = {true, 0};
+	uint8_t data = bytein(0x60);
+	//check if it was a 0xf0 to mean the key was released
+	if(data == 0xf0){
+		key_data.pressed = false;
+		return;
+	}
+	#ifdef BAD_KEYBOARD
+	key_data.code = data;
+	#else
+	key_data.code = scancode_lookup_table[data];
+	#endif
+	if((key_buffer_pointer_top+1)%KEY_BUFFER_LENGTH == key_buffer_pointer_bottom){
+		return;
+		//buffer "full"
+	}
+	//put in the buffer
+	key_buffer[key_buffer_pointer_top] = key_data;
+	key_buffer_pointer_top = (key_buffer_pointer_top+1)%KEY_BUFFER_LENGTH;
+	uint8_t tmp = get_ascii(key_data.code) * key_data.pressed;
+	if(tmp >= '1' || tmp <= '9'){
+		next_id = tmp-'0';
+		tmp_bool = true;
+	}
+	key_data.pressed = true;
 }
 
 bool is_key_waiting(){

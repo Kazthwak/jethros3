@@ -2,6 +2,10 @@
 #include "../kernel.h"
 
 #define ARBITRARY_SIZE_LIMIT (8*0x400) //(8KB)
+//size in 4kB pages. 16= 64k
+#define LOADED_PROG_STACK_SIZE 16
+//size in bytes
+#define LOADED_PROG_KERN_STACK_SIZE 2*0x1000 //= 8k
 
 //TODO:
 //This code makes a new task and puts it in the scheduler queue thing
@@ -39,17 +43,29 @@ struct elf_program_ent{
 }__attribute__((packed));
 
 
+#define CHECK_VECTOR(vector) if(vector == 0){print_string("ERROR DURING VECTOR RESIZING IN PROGRAM ALLOCATION"); goto cleanup;}
+
 char tmp_stack[512];
 
 //TODO FIX this so that it has safety checks. Currently an elf could corrupt the whole computer by being weird
 int load_program_and_execute(char* name){
+	//Declarations
 	void* prog_ptr = fl_fopen(name, "r");
-	if(prog_ptr == 0){return(0);}
+	vector* pages_used = 0;
+	struct task_data* task_info = 0;
+	struct regs* machine_state = 0;
+	uint8_t* kernel_stack = 0;
+	
+	
+	if(prog_ptr == 0){
+		print_string("FILE NOT FOUND \n");
+		goto cleanup;
+	}
 	fl_fseek(prog_ptr, 0, SEEK_END);
 	uint32_t size = fl_ftell(prog_ptr);
 	if(size > ARBITRARY_SIZE_LIMIT){
 		print_string("FILE TOO LARGE");
-		return(0);
+		goto cleanup;
 	}
 	//read header
 	fl_fseek(prog_ptr, 0, SEEK_SET);
@@ -58,66 +74,101 @@ int load_program_and_execute(char* name){
 	struct elf_header* prog_header = (struct elf_header*)header;
 	if(prog_header->magic != 0x464C457F || prog_header->bits != 1 || prog_header->endianess != 1){
 		print_string("INVALID HEADER");
-		return(0);
+		goto cleanup;
 	}
 	if(prog_header->type != 2){
 		print_string("NOT AN EXECUTABLE FILE");
-		return(0);
+		goto cleanup;
 	}
 	if(prog_header->machine_type != 3){
 		print_string("NOT AN INTEL EXECUTABLE");
-		return(0);
+		goto cleanup;
 	}
 	if(prog_header->program_head_ent_size < sizeof(struct elf_program_ent)){
 		print_string("PROGRAM ENTRIES SMALLER THAN STRUCT?");
-		return(0);
+		goto cleanup;
 	}
 	uint32_t program_header_size = (prog_header->program_head_ent_size)*(prog_header->num_program_head_ents);
 	if(program_header_size + prog_header->program_header_off > 512){
-		hexword(program_header_size + prog_header->program_header_off);
+		//hexword(program_header_size + prog_header->program_header_off);
 		print_string(" IS LARGER THAN LOADED PORTION OF FILE");
-		return(0);
+		goto cleanup;
 	}
-	vector* pages_used = new_vector();
+	pages_used = new_vector();
+	if(pages_used == 0){
+		print_string("ERROR IN CREATING PAGE TRACKING VECTOR");
+		goto cleanup;
+	}
 	for(uint16_t i = 0; i < prog_header->num_program_head_ents; i++){
 		//chatgpt informs me that this is difficult to follow. I can't imagine this being a problem in the future?'
 		struct elf_program_ent elf_prog_head_ent = *(struct elf_program_ent*)(i*(prog_header->program_head_ent_size) + prog_header->program_header_off + header);
 		if(elf_prog_head_ent.type ==0 || elf_prog_head_ent.type >= 4){continue;}
 		else if(elf_prog_head_ent.type != 1){
 			print_string("INCOMPATABLE ELF SECTION TYPE");
-			return(0);
+			goto cleanup;
 		}
 		//is a 1 == load
-		hexword(elf_prog_head_ent.file_offset);newline();hexdword(elf_prog_head_ent.type);newline();newline();
+		//debug info
+		//hexword(elf_prog_head_ent.file_offset);newline();hexdword(elf_prog_head_ent.type);newline();newline();
 		uint32_t aligned_loc = (elf_prog_head_ent.target_address)&0xfffff000;
 		uint32_t bonus_jank = elf_prog_head_ent.target_address-aligned_loc;
 		uint16_t pages_needed = (elf_prog_head_ent.mem_size + 0xfff + bonus_jank)/0x1000;
 		uint32_t prev_entries = pages_used->length;
 		//make the vector bigger
-		pages_used = resize_vector(pages_used, pages_needed*2 + prev_entries);
+		vector* tmp4 = resize_vector(pages_used, pages_needed*2 + prev_entries);
+		CHECK_VECTOR(tmp4)
+		pages_used = tmp4;
 		for(uint16_t j = 0; j < pages_needed; j++){
 			//work out the address
 			uint32_t page_base = aligned_loc + j*0x1000;
 			//record at the even location the virtual address
 			pages_used->data[2*j+prev_entries] = page_base;
 			//allocate a physical page
-			alloc_and_map_page(page_base);
+			//first check if already allocated:
+			if(get_phys_address(page_base) != 0xffffffff){
+				//if so deallocate it
+				unmap_page(page_base);
+			}
+			if(alloc_and_map_page(page_base) == false){
+				print_string("OUT OF FREE PAGES FOR PROGRAM");
+				goto cleanup;
+			}
 			//record at the odd location the physical address for swapping back in (when I implement that)
 			pages_used->data[2*j+1+prev_entries] = get_phys_address(page_base);
 		}
+		//flush the page cache to avoid bugs
+		page_reload();
 		//addresses set up, now load
 		//clear the memory
 		memset((void*)elf_prog_head_ent.target_address, 0x0, elf_prog_head_ent.mem_size);
 		//load into memory
 		fl_fseek(prog_ptr, elf_prog_head_ent.file_offset, SEEK_SET);
-		uint32_t tmp = fl_fread((void*)elf_prog_head_ent.target_address, 1, elf_prog_head_ent.size, prog_ptr);
-		if(tmp != elf_prog_head_ent.size){
+		uint32_t tmp1 = fl_fread((void*)elf_prog_head_ent.target_address, 1, elf_prog_head_ent.size, prog_ptr);
+		if(tmp1 != elf_prog_head_ent.size){
 			//this is an inside joke
 			print_string("THROW SCREEN OUT OF WINDOW (File read error)");
 		}
 	}
 	//backup pages_used into a struct somewhere - currently it is just a memory leak
 	//setup stack
+	uint32_t prev_entries = pages_used->length;
+	vector* tmp2 = resize_vector(pages_used, LOADED_PROG_STACK_SIZE*2 + prev_entries);
+	CHECK_VECTOR(tmp2)
+	pages_used = tmp2;
+	for(uint16_t i = 0; i < LOADED_PROG_STACK_SIZE; i++){
+		uint32_t page_base = 0xc0000000-((i+1)*0x1000);
+		pages_used->data[2*i+prev_entries] = page_base;
+		//first check if already allocated:
+		if(get_phys_address(page_base) != 0xffffffff){
+			//if so deallocate it
+			unmap_page(page_base);
+		}
+		if(alloc_and_map_page(page_base) == false){
+			print_string("OUT OF FREE PAGES FOR STACK");
+			goto cleanup;
+		}
+		pages_used->data[2*i+1+prev_entries] = get_phys_address(page_base);
+	}
 	//setup kernel stack
 	// goto user mode
 	/*
@@ -126,7 +177,87 @@ int load_program_and_execute(char* name){
 	clear_keyboard_buffer();
 	*/
 	// intoff();
-	update_tss_stack_ptr(0x10, tmp_stack);
-	iret_to_address(prog_header->entry, (void*)((uint32_t)header) + 511);
+	
+	task_info = kmalloc(sizeof(struct task_data));
+	if(task_info == 0){
+		print_string("TASK INFO ALLOCATION FAILED");
+		goto cleanup;
+	}
+	machine_state = kmalloc(sizeof(struct regs));
+	if(machine_state == 0){
+		print_string("FAILIURE IN ALLOCATING REGISTER STRUCTURE");
+		goto cleanup;
+	}
+	memset(machine_state, 0x00, sizeof(struct regs));
+	machine_state->gs = (4 * 8) | 3;
+	machine_state->fs = (4 * 8) | 3;
+	machine_state->es = (4 * 8) | 3;
+	machine_state->ds = (4 * 8) | 3;
+	machine_state->ss = (4 * 8) | 3;
+	machine_state->useresp = 0xbffffff0;
+	machine_state->eflags = 0x202;
+	machine_state->eip = prog_header->entry;
+	machine_state->cs = (3 * 8) | 3;
+	
+	task_info->pages_used = pages_used;
+	task_info->saved_regs = machine_state; 
+	kernel_stack = kmalloc(LOADED_PROG_KERN_STACK_SIZE);
+	if(kernel_stack == 0){
+		print_string("COULDN'T ALLOCATE KERNEL STACK");
+		goto cleanup;
+	}
+	task_info->kernel_stack_pointer = (uint32_t)kernel_stack + LOADED_PROG_KERN_STACK_SIZE;
+	task_info->id = find_free_task_id();
+	if(task_info->id == 0){
+		print_string("NO FREE TASK IDs FOUND\n");
+		goto cleanup;
+	}
+	uint16_t tasks_len = tasks->length;
+	vector* tmp3 = tasks->resize(tasks, tasks_len + 1);
+	if(tmp3 == 0){
+		print_string("TASKS VECTOR RESIZING FAILED");
+		goto cleanup;
+	}
+	tasks = tmp3;
+	
+	
+	//data now owned by sheduler. Under no circumstances go to cleaunp because then it would free an in use pointer
+	tasks->data[tasks_len] = (uint32_t)task_info;
+	
+	switch_to_task(task_info->id);
+	/*
+	 update_tss_stack_ptr(0x10, tmp_stack);
+	 i ret_to_address(prog_header->entry, 0xbffffff0);*
+	 */
+	if(prog_ptr != 0){
+		fl_fclose(prog_ptr);
+	}
 	return(1);
+	/*
+	 void* prog_ptr = fl_fopen*(name, "r");
+	 vector* pages_used = 0;
+	 struct task_data* task_info = 0;
+	 struct regs* machine_state = 0;
+	 uint8_t* kernel_stack = 0;
+	*/
+	cleanup:
+	if(prog_ptr != 0){
+		fl_fclose(prog_ptr);
+	}
+	if(pages_used != 0){
+		for(uint16_t i = 0; i < pages_used->length; i+=2){
+			dealloc_phys_page(pages_used->data[i+1]);
+		}
+		destroy_vector(pages_used);
+	}
+	if(task_info != 0){
+		kfree(task_info);
+	}
+	if(machine_state != 0){
+		kfree(machine_state);
+	}
+	if(kernel_stack != 0){
+	kfree(kernel_stack);
+	}
+	return(0);
 }

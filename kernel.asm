@@ -88,30 +88,46 @@ testing:
 
 global asm_iret
 asm_iret:
-	push ebp
-	mov ebp, esp
-; 	sub esp, 0 ;stack frame space
-	;[ebp+8]  is address
-	;[ebp+12] is stack
+	mov esp, [esp+4]
 	
-	;setup segments
-	mov ax, (4 * 8) | 3 ; ring 3 data with bottom 2 bits set for ring 3
-	mov ds, ax
-	mov es, ax 
-	mov fs, ax 
-	mov gs, ax ; SS is handled by iret
-
-	; set up the stack frame iret expects
-	mov eax, esp
-	push (4 * 8) | 3 ; data selector
-	push eax ; current esp
-	pushf ; eflags
-	push (3 * 8) | 3 ; code selector (ring 3 code with bottom 2 bits set for ring 3)
-	push [ebp+8] ; instruction address to return to
+	pop gs
+	pop fs
+	pop es
+	pop ds
+	
+	popa
+	
+	add esp, 8
+	
 	iret
 	
-	leave
-	ret
+	
+	;old code
+	;push ebp
+	;mov ebp, esp
+; 	;sub esp, 0 ;stack frame space
+	;;[ebp+8]  is address
+	;;[ebp+12] is stack
+
+	
+	;;setup segments
+	;mov ax, (4 * 8) | 3 ; ring 3 data with bottom 2 bits set for ring 3
+	;mov ds, ax
+	;mov es, ax 
+	;mov fs, ax 
+	;mov gs, ax ; SS is handled by iret
+
+	;; set up the stack frame iret expects
+	;mov eax, [ebp+12]
+	;push (4 * 8) | 3 ; data selector
+	;push eax ;target stack
+	;pushf ; eflags
+	;push (3 * 8) | 3 ; code selector (ring 3 code with bottom 2 bits set for ring 3)
+	;push [ebp+8] ; instruction address to return to
+	;iret
+	
+	;leave
+	;ret
 	
 %include "int.asm"
 

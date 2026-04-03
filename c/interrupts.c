@@ -33,10 +33,18 @@ void fault_handler(struct regs* r){
 				print_string("ERROR, INSUFFICIENT MEMORY");
 			}
 		}
+		uint32_t address;
+		asm volatile("mov %%cr2, %%eax" : "=a" (address):);
+		print_string("\ncr2: ");
+		hexdword(address);
+		newline();
 	}
 	print_string("\n\nException number ");
 	hexdword(r->int_no);
 	print_string(" fired\n");
+	print_string("Error code (bin) ");
+	binword(r->err_code);
+	print_string("\nInstruction pointer was "); hexdword(r->eip);
 	hang();
 }
 

@@ -1,6 +1,15 @@
 #ifndef HEADER_GUARD
 #define HEADER_GUARD
 #define version "JETHROS3 Version 0.4"
+
+#define ART_TITLE "\
+         ## ####### ######## ##   ## ######         #####   ###### \n\
+        ## ##         ##    ##   ## ##   ##       ##   ## ##      \n\
+       ## #####      ##    ####### ######        ##   ##  #####  \n\
+ ##   ## ##         ##    ##   ## ##   ##   ##  ##   ##      ## \n\
+ #####  #######    ##    ##   ## ##   ##   ##   #####  ######  \n\
+                                                         "
+
 #define DEBUG_BUILD
 //--------includes
 #include <stdint.h>
@@ -28,7 +37,7 @@
 //for fixing janky pointers
 #define PAGING_OFFSET 0xc0000000
 //memory/paging
-#define page_size (0x400*0x4) //4096b (4kb)
+#define page_size (0x400*0x4) //4096b (4kb)0x
 #define num_pages 0x100000 //number of 4kb pages in 4gb
 #define num_page_entries (num_pages/32)
 #define ONE_MB (0x400*0x400)
@@ -47,8 +56,14 @@
 //keyboard
 #define KEY_BUFFER_LENGTH 1024
 
-#define HEAP_SIZE (1*page_size)
+//0x100 pages = 1mb
+#define HEAP_SIZE (0x100*page_size)
 #define HEAP_PAGES ((HEAP_SIZE)+(page_size)-1)/(page_size)
+
+//Temporary debgugging vars
+volatile bool tmp_bool = false;
+volatile uint16_t next_id = 0;
+
 
 //--------externs
 //shoudl contain 0x36d76289
@@ -427,6 +442,7 @@ int abstracted_disc_part_read(uint32_t sector, uint8_t* buffer, uint32_t sector_
 void int0x30handle(struct regs* r);
 void shell(void);
 char get_ascii(uint8_t code);
+bool is_ascii(uint8_t code);
 int load_program_and_execute(char* name);
 extern void run_prog(void* address);
 void set_flick(bool state);
@@ -438,6 +454,15 @@ void init_tss(void);
 int update_tss_stack_ptr(uint32_t base, uint32_t addr);
 void tss_init_late(void);
 bool new_page_table(uint16_t num);
-extern void asm_iret(uint32_t address, uint32_t stack);
-void iret_to_address(uint32_t addr, uint32_t stack);
+extern void asm_iret(struct regs* r);
+void iret_to_address(struct regs* r);
+uint16_t find_free_task_id(void);
+void task_init(void);
+void switch_to_task(uint16_t id);
+void dealloc_phys_page(uint32_t phys_addr);
+void schedule_tick(struct regs* r);
+void during_int_switch_to_task(struct regs* r, uint16_t id);
+void update_current_task(struct regs* r);
+void unmap_page(uint32_t virt_addr);
+void dump_vector(vector* target);
 #endif

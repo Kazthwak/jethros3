@@ -85,6 +85,7 @@ void kernel_init(){
 	print_string("Keyboard initialised\n");
 	mono_disc_init();
 	print_string("Disc controller initialised\n");
+	task_init();
 	print_string("\nBoot completed. Press any key to continue.");
 	clear_keyboard_buffer();
 	while(!is_key_waiting());
@@ -92,6 +93,7 @@ void kernel_init(){
 	clear_screen();
 	print_string("Welcome to ");
 	print_string(version);
-	print_string("\n");main();
+	print_string("\n");
+	main();
 	hang();
 }

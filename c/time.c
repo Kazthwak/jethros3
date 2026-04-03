@@ -23,8 +23,16 @@ void set_flick(bool state){
 
 
 
-void timer_handle(__attribute__((unused)) struct regs* r){
+void timer_handle(struct regs* r){
 	time++;
+	/*uint16_t asd = cursor_y;
+	uint16_t abd = cursor_x;
+	cursor_x = 0;
+	cursor_y = 10;
+	hexdword(r->ecx);
+	cursor_y = asd;
+	cursor_x = abd;*/
+	schedule_tick(r);
 	#ifdef flicker
 	if(fl){
 		if(time%TIMER_FREQUENCY == 0){
