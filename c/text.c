@@ -27,6 +27,13 @@ void print_string(char* string){
 	}
 }
 
+void print_string_length(char* string, uint32_t len){
+	for(uint32_t i = 0; i < len; i++){
+		putchar(*string);
+		string++;
+	}
+}
+
 void hexdig(uint8_t num){
 	uint8_t tmp = 0x30; //('0')
 	if(num >= 0xa){

@@ -25,7 +25,7 @@ void keyboard_handle(__attribute__((unused)) struct regs* r){
 	key_buffer[key_buffer_pointer_top] = key_data;
 	key_buffer_pointer_top = (key_buffer_pointer_top+1)%KEY_BUFFER_LENGTH;
 	uint8_t tmp = get_ascii(key_data.code) * key_data.pressed;
-	if(tmp >= '1' || tmp <= '9'){
+	if(tmp >= '1' && tmp <= '9'){
 		next_id = tmp-'0';
 		tmp_bool = true;
 	}

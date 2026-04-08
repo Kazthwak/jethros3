@@ -12,6 +12,11 @@ void fault_handler(struct regs* r){
 				uint32_t page_address = address&0xfffff000;
 				if(page_address < 0xc0000000){
 					print_string("NON KERNEL MEMORY USED UNMAPPED. ERROR");
+					asm volatile("mov %%cr2, %%eax" : "=a" (address):);
+					print_string("\ncr2: ");
+					hexdword(address);
+					print_string("\nError code (bin) ");
+					binword(r->err_code);
 					hang();
 				}
 				//check if address is near a boandary. I am checking an excessive amount to avoid errors. ----- WHY ON EARTH DID YOU PICK 0x11 BYTES????????? QUITE RANDOM

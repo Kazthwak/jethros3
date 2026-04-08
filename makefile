@@ -7,7 +7,7 @@ run: jethros.img
 	@qemu-system-x86_64 -no-reboot -drive format=raw,file=jethros.img,media=disk -boot menu=off -serial file:serial.log -m 1G \
 	-drive if=pflash,format=raw,readonly=on,file=./grub_files/OVMF_CODE.4m.fd -drive if=pflash,format=raw,file=./grub_files/OVMF_VARS.4m.fd
 
-jethros.img: jethros.bin BOOTX64.EFI makefile test_program
+jethros.img: jethros.bin BOOTX64.EFI makefile disc/test_program disc/test_program_c.elf
 	@cp jethros.bin ./disc/boot/jethr.os
 	@dd if=/dev/zero of=jethros.img bs=1M count=64
 	@parted jethros.img --script mklabel gpt mkpart ESP fat32 1MiB 100% set 1 esp on
@@ -17,6 +17,9 @@ jethros.img: jethros.bin BOOTX64.EFI makefile test_program
 	@mcopy -i jethros.img@@1048576 BOOTX64.EFI ::/EFI/BOOT/
 	@mcopy -i jethros.img@@1048576 -s ./disc/* ::
 
+disc/test_program_c.elf: test_program.c
+	~/opt/hosted/bin/i686-jethros-gcc test_program.c -o disc/test_program_c.elf
+	
 test_program: test_program.asm makefile test_link.ld
 	@nasm -f elf32 test_program.asm -o test_program.o
 	@ld -m elf_i386 -T test_link.ld -o test_program test_program.o

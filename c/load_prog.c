@@ -45,10 +45,143 @@ struct elf_program_ent{
 
 #define CHECK_VECTOR(vector) if(vector == 0){print_string("ERROR DURING VECTOR RESIZING IN PROGRAM ALLOCATION"); goto cleanup;}
 
-char tmp_stack[512];
+void fork(struct regs* r){
+	uint16_t i = 0;
+	for(; i < tasks->length; i++){
+		if(((struct task_data*)tasks->data[i])->id == current_task){
+			break;
+		}
+		if(i == tasks->length-1){
+			print_string("ERROR TASK NOT FOUND\n");
+			hang();
+		}
+	}
+	
+	uint8_t tmp_data[4*0x400]; //4kB = one page
+	vector* pages_used = 0;
+	struct task_data* task_info = 0;
+	struct regs* machine_state = 0;
+	uint8_t* kernel_stack = 0;
+	
+	//i is task index
+	task_info = kmalloc(sizeof(struct task_data));
+	if(task_info == 0){
+		print_string("TASK INFO ALLOCATION FAILED FORK\n");
+		goto cleanup;
+	}
+	machine_state = kmalloc(sizeof(struct regs));
+	if(machine_state == 0){
+		print_string("FAILIURE IN ALLOCATING REGISTER STRUCTURE FORK\n");
+		goto cleanup;
+	}
+	memcpy(machine_state, r, sizeof(struct regs));
+	machine_state -> ebx = 0;
+	
+	pages_used = new_vector();
+	resize_vector(pages_used, ((struct task_data*)tasks->data[i])->pages_used->length);
+	if(pages_used == 0){
+		print_string("ERROR MAKING PAGES_USED VECTOR\n");
+		goto cleanup;
+	}
+	//copy data from old task to new one
+	for(uint16_t j = 0; j < pages_used->length; j += 2){
+		//copy the virtual address
+		pages_used->data[j] = ((struct task_data*)tasks->data[i])->pages_used->data[j];
+		//allocate a new physical page for it
+		pages_used->data[j+1] = (uint32_t)alloc_phys_page(0);
+		//check that allocation was succesful
+		if(pages_used->data[j+1] == 0xffffffff){
+			print_string("FAILED TO ALLOCATE PHYS PAGE\n");
+			goto cleanup;
+		}
+		//copy the data in the page to a temporary area
+		memcpy(tmp_data, (void*)pages_used->data[j], sizeof(tmp_data));
+		//map the new physical address in
+		unmap_page(pages_used->data[j]);
+		map_page(pages_used->data[j+1], pages_used->data[j]);
+		//copy it back to the new physical page at the same virtual address
+		memcpy((void*)pages_used->data[j], tmp_data, sizeof(tmp_data));
+		//revert the mapping so that the task can be resumed
+		unmap_page(pages_used->data[j]);
+		map_page(((struct task_data*)tasks->data[i])->pages_used->data[j+1], pages_used->data[j]);		
+	}
+	
+	task_info->pages_used = pages_used;
+	task_info->saved_regs = machine_state; 
+	kernel_stack = kmalloc(LOADED_PROG_KERN_STACK_SIZE);
+	if(kernel_stack == 0){
+		print_string("COULDN'T ALLOCATE KERNEL STACK");
+		goto cleanup;
+	}
+	task_info->kernel_stack_pointer = (uint32_t)kernel_stack + LOADED_PROG_KERN_STACK_SIZE;
+	task_info->id = find_free_task_id();
+	if(task_info->id == 0){
+		print_string("NO FREE TASK IDs FOUND\n");
+		goto cleanup;
+	}
+	uint16_t tasks_len = tasks->length;
+	vector* tmp3 = tasks->resize(tasks, tasks_len + 1);
+	if(tmp3 == 0){
+		print_string("TASKS VECTOR RESIZING FAILED");
+		goto cleanup;
+	}
+	tasks = tmp3;
+	
+	
+	//data now owned by sheduler. Under no circumstances go to cleaunp because then it would free an in use pointer
+	tasks->data[tasks_len] = (uint32_t)task_info;
+	
+	r->eax = 0;
+	return;
+	
+	cleanup:
+	print_string("CLEANUP REACHED\n");
+	if(pages_used != 0){
+		for(uint16_t j = 0; j < pages_used->length; j+=2){
+			dealloc_phys_page(pages_used->data[j+1]);
+		}
+		destroy_vector(pages_used);
+	}
+	if(task_info != 0){
+		kfree(task_info);
+	}
+	if(machine_state != 0){
+		kfree(machine_state);
+	}
+	if(kernel_stack != 0){
+		kfree(kernel_stack);
+	}
+	r->eax = 4;
+	return;
+}
+
+void destroy_process(uint16_t id){
+	uint16_t i = 0;
+	for(; i < tasks->length; i++){
+		if(((struct task_data*)tasks->data[i])->id == id){
+			break;
+		}
+		if(i == tasks->length-1){
+			print_string("ERROR TASK NOT FOUND\n");
+			hang();
+		}
+	}
+	//i is task index
+	struct task_data* dying_task = (struct task_data*)tasks->data[i];
+	tasks->data[i] = tasks->data[tasks->length-1];
+	tasks->resize(tasks, tasks->length-1);
+	kfree((void*)dying_task->saved_regs);
+	kfree((void*)dying_task->kernel_stack_pointer);
+	vector* pages_used = dying_task->pages_used;
+	
+	for(uint16_t j = 1; j < pages_used->length; j+= 2){
+		dealloc_phys_page(pages_used->data[j]);
+	}
+	kfree(pages_used);
+}
 
 //TODO FIX this so that it has safety checks. Currently an elf could corrupt the whole computer by being weird
-int load_program_and_execute(char* name){
+int load_program(char* name){
 	//Declarations
 	void* prog_ptr = fl_fopen(name, "r");
 	vector* pages_used = 0;
@@ -63,7 +196,10 @@ int load_program_and_execute(char* name){
 	}
 	fl_fseek(prog_ptr, 0, SEEK_END);
 	uint32_t size = fl_ftell(prog_ptr);
-	if(size > ARBITRARY_SIZE_LIMIT){
+	print_string("FILE SIZE: ");
+	hexdword(size);
+	print_string(" BYTES\n");
+	if(size > ARBITRARY_SIZE_LIMIT && 0){
 		print_string("FILE TOO LARGE");
 		goto cleanup;
 	}
@@ -172,10 +308,10 @@ int load_program_and_execute(char* name){
 	//setup kernel stack
 	// goto user mode
 	/*
-	clear_keyboard_buffer();
-	while(!is_key_waiting());
-	clear_keyboard_buffer();
-	*/
+	 * clear_keyboard_buffer();
+	 * while(!is_key_waiting());
+	 * clear_keyboard_buffer();
+	 */
 	// intoff();
 	
 	task_info = kmalloc(sizeof(struct task_data));
@@ -224,22 +360,17 @@ int load_program_and_execute(char* name){
 	//data now owned by sheduler. Under no circumstances go to cleaunp because then it would free an in use pointer
 	tasks->data[tasks_len] = (uint32_t)task_info;
 	
-	switch_to_task(task_info->id);
-	/*
-	 update_tss_stack_ptr(0x10, tmp_stack);
-	 i ret_to_address(prog_header->entry, 0xbffffff0);*
-	 */
 	if(prog_ptr != 0){
 		fl_fclose(prog_ptr);
 	}
-	return(1);
+	return(task_info->id);
 	/*
-	 void* prog_ptr = fl_fopen*(name, "r");
-	 vector* pages_used = 0;
-	 struct task_data* task_info = 0;
-	 struct regs* machine_state = 0;
-	 uint8_t* kernel_stack = 0;
-	*/
+	 * void* prog_ptr = fl_fopen*(name, "r");
+	 * vector* pages_used = 0;
+	 * struct task_data* task_info = 0;
+	 * struct regs* machine_state = 0;
+	 * uint8_t* kernel_stack = 0;
+	 */
 	cleanup:
 	if(prog_ptr != 0){
 		fl_fclose(prog_ptr);
@@ -257,7 +388,12 @@ int load_program_and_execute(char* name){
 		kfree(machine_state);
 	}
 	if(kernel_stack != 0){
-	kfree(kernel_stack);
+		kfree(kernel_stack);
 	}
 	return(0);
+}
+
+int load_program_and_execute(char* name){
+	switch_to_task(load_program(name));
+	return(1); //FIXTHIS
 }

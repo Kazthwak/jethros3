@@ -82,6 +82,10 @@ void during_int_switch_to_task(struct regs* r, uint16_t id){
 }
 
 void switch_to_task(uint16_t id){
+	if(id == 0){
+		print_string("ERROR TASK ID 0");
+		hang();
+	}
 	for(uint16_t i = 0; i < tasks->length; i++){
 		if(((struct task_data*)tasks->data[i])->id == id){
 			//correct task found

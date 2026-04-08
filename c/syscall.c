@@ -1,9 +1,8 @@
 #include "../kernel.h"
 
 uint32_t call_int0x30(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx){
-	uint32_t tmp = 0;
-	asm volatile("int $0x30" : "=a" (eax) : "a" (eax), "b" (ebx), "c" (ecx), "d" (edx));
-	return(tmp);
+	asm volatile("int $0x30" : "=a" (eax) : "a" (eax), "b" (ebx), "c" (ecx), "d" (edx) : "memory");
+	return(eax);
 }
 
 /*	EAX is the mode, EBX, ECX and EDX are paramaters. EAX is primary return value
@@ -15,7 +14,7 @@ uint32_t call_int0x30(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx){
  *	Mode = 2: Keyboard input
  *	Mode = 3: disc
  *	Mode = 4: Timer
- *	Mode = 5: Multitasking //For the future
+ *	Mode = 5: Task
  *	
  *	TEXT
  *	0: print the string in ebx
@@ -32,6 +31,7 @@ uint32_t call_int0x30(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx){
  *		5: hex qword
  *		6: 16_bit decimal
  *		7: expanding decimal
+ *	6: lengthed string (ebx is string ecx is length)
  * 
  *	GRAPHICS
  *	
@@ -42,14 +42,27 @@ uint32_t call_int0x30(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx){
  *	3: get_ascii
  *	4: clear buffer
  *	
- *	DISC
+ *  TODO ADD SECURITY so that reads cannot overwrite kernel code...
+ *	DISC ebx is always file pointer
+ *	0: fopen - name is ebx, ecx is flags, edx is mode
+ *	1: fclose
+ *	2: fread - ecx is buffer, edx is length
+ *	3: fwrite - ecx is buffer, edx is length
+ *	4: fseek - ecx is offset, edx is whence
+ *	5: fstat - ecx is stat
  *	
  *	TIMER
  *	
- *	MEMORY
- *	
- *	
- *	
+ *	TASK
+ *	0: exit the current task
+ *	1: execve(char *name, char **argv, char **env)
+ *	2: int fork(void)
+ *	3: getpid(void) returns pid
+ *	4: isatty(int file) returns if the output is a terminal
+ *	5: int kill(int pid, int sig)
+ *	6: 
+ *	7: 
+ *	8: 
  *	
  *	
  *	
@@ -62,7 +75,7 @@ uint32_t call_int0x30(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx){
  *	EAX = 1: unsupported mode
  *	EAX = 2: unsupported command
  *	EAX = 3: unsupported sub-command
- *	EAX >=4: other failiure
+ *	EAX = 4: failiure in executing command
  *	
  *	
  */
@@ -122,16 +135,21 @@ void int0x30handle(struct regs* r){
 							break;
 					}
 					break;
-				default:
-					r->eax = 2;
-					return;
+			case(6)://print length
+				print_string_length((char*)r->ebx, r->ecx);
+				break;
+			default:
+				r->eax = 2;
+				return;
 			}
 			r->eax = 0;
 			return;
+		
 		case(1):
 			//Non-text graphics
 			r->eax = 2;
 			break;
+		
 		case(2):
 			//Keyboard input
 			switch(((r->eax)>>8)&0xff){
@@ -157,10 +175,50 @@ void int0x30handle(struct regs* r){
 			}
 			r->eax = 0;
 			return;
+		
 		case(3):
-			//Disc
+		//Disc
+			switch(((r->eax)>>8)&0xff){
+				default:
+					r->eax = 2;
+					return;
+				case(0):
+					//fopen
+					//TODO fix this to properly use the flags (ecx) and mode (edx)
+					char* mode = "r";
+					r->ebx = (uint32_t)fl_fopen((char*)r->ebx, mode);
+					r->eax = 0;
+					return;
+				case(1):
+					//fclose
+					fl_fclose((void*)r->ebx);
+					r->eax = 0;
+					return;
+				case(2):
+					//fread
+					fl_fread((void*)r->ecx, 1, r->edx, (void*)r->ebx);
+					r->eax = 0;
+					return;
+				case(3):
+					//write
+					fl_fwrite((void*)r->ecx, 1, r->edx, (void*)r->ebx);
+					r->eax = 0;
+					return;
+				case(4):
+					fl_fseek((void*)r->ebx, r->ecx, r->edx);
+					r->ebx = fl_ftell((void*)r->ebx);
+					r->eax = 0;
+					return;
+				case(5):
+					//TODO FIXTHIS
+					//fl_fstat(r->ebx, r->ecx);
+					r->ebx = 0;
+					r->eax = 0;
+					return;
+			}
 			r->eax = 2;
 			break;
+		
 		case(4):
 			//timer
 			switch(((r->eax)>>8)&0xff){
@@ -170,6 +228,55 @@ void int0x30handle(struct regs* r){
 			}
 			r->eax = 0;
 			break;
+		
+		case(5):
+			//task
+			switch(((r->eax)>>8)&0xff){
+				case(0):
+					//exit the current program
+					//TODO MAKE THIS EXIT
+					print_string("_exit() called\n");
+					hang();
+					r->eax = 1;
+					return;
+				case(1):
+					//execve(char *name, char **argv, char **env)
+					hang();
+					r->eax = 0;
+					return;
+				case(2):
+					//int fork(void)
+					r->ebx = current_task;
+					r->eax = 0;
+					fork(r);
+					return;
+				case(3):
+					//getpid(void) returns pid
+					r->ebx = current_task;
+					r->eax = 1;
+					return;
+				case(4):
+					//isatty(int file) returns if the output is a terminal
+					r->ebx = (r->ebx <= 2);
+					hexbyte(r->ebx);
+					r->eax = 0;
+					return;
+				case(5):
+					//int kill(int pid, int sig)
+					if(r->ebx != current_task){
+						destroy_process(r->ebx);
+						r->eax = 0;
+						return;
+					}
+					//self killed - care must be taken
+					r->eax = 0;
+					return;
+				default:
+					r->eax = 2;
+					return;
+				}
+				r->eax = 0;
+				break;
 		default:
 			r->eax = 1;
 			break;

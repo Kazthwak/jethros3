@@ -465,4 +465,8 @@ void during_int_switch_to_task(struct regs* r, uint16_t id);
 void update_current_task(struct regs* r);
 void unmap_page(uint32_t virt_addr);
 void dump_vector(vector* target);
+int load_program(char* name);
+void destroy_process(uint16_t id);
+void fork(struct regs* r);
+void print_string_length(char* string, uint32_t len);
 #endif
