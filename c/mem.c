@@ -12,11 +12,25 @@ uint32_t page_table_0[1024] __attribute__((aligned(4096))) = {0};
 void* phys_mem_pokage;
 uint32_t phys_mem_pokage_last_base = 0xffffffff;
 
-void mem_init(){
+struct memory_map{
+	uint32_t entry_size;
+	uint32_t entry_version;
+	//then data
+}__attribute__((packed));
+
+struct memory_map_entry{
+	uint64_t base_address;
+	uint64_t length;
+	uint32_t type;
+	uint32_t reserved;
+}__attribute__((packed));
+
+void init_mem_early(void* memory_map, uint32_t size){
 	end_of_used_ram = &_kernel_end;
 	beg_of_used_ram = (void*)(((uint32_t)&_kernel_start)+PAGING_OFFSET);
-	max_mem += ONE_MB; //Now adjusted for the ignored first MB of memory
+
 	first_mem_hole = max_mem;
+	
 	for(uint16_t i= 0; i < 1024; i++){
 		page_tables[i] = 0;
 	}
@@ -24,13 +38,49 @@ void mem_init(){
 	page_tables[769] = &page_table_kernel_2;
 	page_tables[770] = &page_table_kernel_3;
 	
+	//replace init_phys_pages
+	struct memory_map* memory_map_header = memory_map;
+	memset(phys_page_state, 0, sizeof(phys_page_state));
+	for(uint32_t i = 0; i < (size / memory_map_header->entry_size); i++){
+		struct memory_map_entry* current_entry = (struct memory_map_entry*)((uint8_t*)memory_map + sizeof(struct memory_map) + (i* memory_map_header->entry_size));
+		//for each page starting on 
+	}
+}
+
+void mem_init(){
+	
 	init_phys_pages();
+	
+	
 	next_free_kernel_mem = (uint32_t)end_of_used_ram;
 	//align it to the next page boundary
 	next_free_kernel_mem >>= 12;
 	next_free_kernel_mem++;
 	next_free_kernel_mem <<= 12;
 	phys_mem_pokage = (void*)kmalloc_permanent_page();
+}
+
+void init_mem_late(){
+	//create new page tables
+	for(uint16_t i = 771; i < 1024; i++){
+		/*
+		 *	//allocate a page table
+		 *	uint32_t* page_table = (uint32_t*)kmalloc_permanent_page();
+		 *	//fill with 0
+		 *	memset(page_table, 0x0, page_size);
+		 *	//put it in the page directory and the page table list
+		 *	page_tables[i] = page_table;
+		 *	page_directory[i] = get_phys_address((uint32_t)page_table) | 3;
+		 *	//  if(!new_page_table(i)){
+		 *		print_string("PAGE TABLE ALLOCATION FAILED");
+		 *		hang();
+		 }*/
+	}
+	
+	page_tables[0] = page_table_0;	
+	page_directory[0] = get_phys_address((uint32_t)page_table_0) | 3;
+	
+	k_heap_allocator_init();
 }
 
 bool new_page_table(uint16_t num){
@@ -49,35 +99,20 @@ bool new_page_table(uint16_t num){
 	return(true);
 }
 
-void init_mem_late(){
-	//create new page tables
-	for(uint16_t i = 771; i < 1024; i++){
-		/*
-		//allocate a page table
-		uint32_t* page_table = (uint32_t*)kmalloc_permanent_page();
-		//fill with 0
-		memset(page_table, 0x0, page_size);
-		//put it in the page directory and the page table list
-		page_tables[i] = page_table;
-		page_directory[i] = get_phys_address((uint32_t)page_table) | 3;
-		//*/  if(!new_page_table(i)){
-			print_string("PAGE TABLE ALLOCATION FAILED");
-			hang();
-		}
-	}
-	
-	page_tables[0] = page_table_0;	
-	page_directory[0] = get_phys_address((uint32_t)page_table_0) | 3;
-	
-	k_heap_allocator_init();
-}
-
 //pages on the boundaries of usability may be flagged as unusable when they are usable (off by one error)
 //I am being conservative to ensure no memory-mapped memory is used
 uint8_t init_page_valid(uint32_t mem_addr){
 	//end of page is after start of OS and start of page is before end of OS
 	//means page includes OS image. May malfunction if the OS image is less than 1 page in size (not a problem)
-	if((mem_addr+page_size) >= (uint32_t)beg_of_used_ram && mem_addr <= (uint32_t)end_of_used_ram){
+	uint32_t mem_addr_end = mem_addr-1+page_size;
+	
+	//OVerflowing (somehow). Just treat as invalid for sanity reasons
+	if(mem_addr_end < mem_addr){
+		return(0);
+	}
+	
+	//clashes with the kernel
+	if(mem_addr_end >= (uint32_t)beg_of_used_ram && mem_addr <= (uint32_t)end_of_used_ram){
 		return(0);
 	}
 	//if the address is less than 1MB
@@ -94,7 +129,7 @@ uint8_t init_page_valid(uint32_t mem_addr){
 	//address is in upper memory and not part of OS
 	else{
 		//end of page is before memory hole
-		if((mem_addr+page_size) < first_mem_hole){
+		if((mem_addr_end) < first_mem_hole){
 			return(1);
 		}
 		//page is past first memory hole (may be usable but to start with I am marking as unusable)
@@ -112,6 +147,9 @@ void init_phys_pages(){
 		//i is page num
 		uint32_t i_addr = page_address(i);
 		uint8_t page_val = init_page_valid(i_addr);
+		if(page_val){
+			free_pages_boot_count++;
+		}
 		if(i%32 == 0){phys_page_state[i/32] = 0;}
 		phys_page_state[i/32] |= page_val<<(i%32);
 	}
@@ -137,9 +175,11 @@ void* alloc_phys_page(uint32_t start_addr){
 				pow2 <<= 1;
 				state >>= 1;
 			}
+			print_string("FREE PAGE DETECTED BUT NOT FOUND?\n");
 			return((void*)0xffffffff);
 		}
 	}
+	print_string("NO PAGES FREE\n");
 	return((void*)0xffffffff);
 }
 

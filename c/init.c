@@ -26,13 +26,29 @@ struct basic_mem_info{
 	uint32_t mem_upper;
 }__attribute__((packed));
 
+/*
+struct memory_map{
+	uint32_t entry_size;
+	uint32_t entry_version;
+	//then data
+}__attribute__((packed));
+
+struct memory_map_entry{
+	uint64_t base_address;
+	uint64_t length;
+	uint32_t type;
+	uint32_t reserved;
+}__attribute__((packed));*/
+
+
 void parse_multiboot2(){
 	uint8_t* data_arr = multiboot2_space;
-	uint16_t multiboot_tag_pointer = 0;
+	uint32_t multiboot_tag_pointer = 0;
 	struct multiboot2_header* multiboot2_data_header = (struct multiboot2_header*)&data_arr[multiboot_tag_pointer];
 	multiboot_tag_pointer += 8;
 	while(1){
-		if(multiboot_tag_pointer > 0x1000 || multiboot_tag_pointer > multiboot2_data_header->total_size){
+		//this check doesn't check if it will read past bounds (if tag starts before but continues over), but this should never happen...'
+		if(multiboot_tag_pointer > 0x1000 || multiboot_tag_pointer >= multiboot2_data_header->total_size){
 			return;
 		}
 		struct multiboot2_tag_top* current_tag = (struct multiboot2_tag_top*)&data_arr[multiboot_tag_pointer];
@@ -52,6 +68,11 @@ void parse_multiboot2(){
 			case 4:		//basic memory information
 				struct basic_mem_info* mem_info = data_addr;
 				max_mem = mem_info->mem_upper;
+				max_mem *= 0x400; //one kB
+				max_mem += ONE_MB; //Now adjusted for the ignored first MB of memory
+				break;
+			case 6:		//memory map
+				init_mem_early(data_addr, current_tag->size);
 				break;
 		}
 		multiboot_tag_pointer += current_tag->size;
@@ -77,7 +98,7 @@ void kernel_init(){
 	irq_init();
 	print_string("IRQs INITIALISED\n");
 	init_mem_late();
-	print_string("Finished memory initialisation with "); hexdword(HEAP_SIZE); print_string(" bytes of heap size\n");
+	print_string("Finished memory initialisation with 0x"); hexdword(HEAP_SIZE); print_string(" bytes of heap size\n");
 	vector_init();
 	time_init();
 	print_string("Timer Initialised\n");

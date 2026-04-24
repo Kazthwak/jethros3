@@ -34,7 +34,12 @@ uint32_t call_int0x30(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx){
  *	6: lengthed string (ebx is string ecx is length)
  * 
  *	GRAPHICS
- *	
+ *	1: copy from *ebx taking it as a bitmap	image ebx by ecx pixels in size (x and y)
+ * 
+ * 
+ * 
+ * 
+ * 
  *	KEYBOARD
  *	0: is key waiting
  *	1: get keypress data
@@ -52,6 +57,8 @@ uint32_t call_int0x30(uint32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx){
  *	5: fstat - ecx is stat
  *	
  *	TIMER
+ *	0: Get time in ms (currently only guaranteed to be good relative to other calls (i.e. for timing, not for checking the time))
+ *	1: Wait ebx ms
  *	
  *	TASK
  *	0: exit the current task
@@ -147,9 +154,17 @@ void int0x30handle(struct regs* r){
 		
 		case(1):
 			//Non-text graphics
-			r->eax = 2;
-			break;
-		
+			switch(((r->eax)>>8)&0xff){
+				default:
+					r->eax = 2;
+					return;
+				case(0):
+					//bitmap screen thing
+					copy_screen_jank(r->ebx, r->ecx, r->edx);
+					r->eax = 0;
+					return;
+			};
+			
 		case(2):
 			//Keyboard input
 			switch(((r->eax)>>8)&0xff){
@@ -225,6 +240,14 @@ void int0x30handle(struct regs* r){
 				default:
 					r->eax = 2;
 					return;
+				case(0):
+					r->ebx = (time*1000 + TIMER_FREQUENCY/2)/TIMER_FREQUENCY;
+					break;
+				case(1):
+					//TODO: make this yield instead of killing performance
+					//round pretty normally . I really need to increase the timer frequency, but I can't on this virtual machine because then the interrupts fire too fast'
+					block_wait_ticks((((r->ebx * TIMER_FREQUENCY) + 499)/1000));
+					break;
 			}
 			r->eax = 0;
 			break;

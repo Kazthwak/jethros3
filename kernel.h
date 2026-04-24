@@ -320,6 +320,9 @@ struct kmalloc_link{
 
 //--------global variables
 
+
+uint32_t free_pages_boot_count = 0;
+
 //4 KB
 __attribute__ ((aligned (32))) uint8_t multiboot2_space[0x400*0x4];
 //NOT A RELIABLE VARIABLE
@@ -469,4 +472,6 @@ int load_program(char* name);
 void destroy_process(uint16_t id);
 void fork(struct regs* r);
 void print_string_length(char* string, uint32_t len);
+void copy_screen_jank(uint32_t src, uint32_t width, uint32_t height);
+void init_mem_early(void* memory_map, uint32_t size);
 #endif

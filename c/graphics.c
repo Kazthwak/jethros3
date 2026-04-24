@@ -1,5 +1,6 @@
 #include "../kernel.h"
 
+
 void graphics_init(){
 	x_char_res = x_res/CHAR_WIDTH;
 	y_char_res = y_res/CHAR_HEIGHT;
@@ -27,6 +28,15 @@ void putpixel(uint16_t x, uint16_t y, uint32_t colour){
 	//*(uint32_t*)((uint32_t)&framebuffer + ((x + (y*x_res))<<2)) = colour;
 	*(uint32_t*)((uint32_t)&framebuffer + ((x)<<2)+ y*pitch) = colour;
 }
+
+//TODO add SECURITY features so that this can't be used to print out kernel information or corrupt things...'
+void copy_screen_jank(uint32_t src, uint32_t width, uint32_t height){
+	uint16_t off_x = (x_res-width)/2;
+	uint16_t off_y = (y_res-height)/2;
+	for(uint16_t i = 0; i < height; i++)
+	memcpy((void*)((uint32_t)&framebuffer + ((off_x)<<2)+ (off_y+i)*pitch), (void*)(src + i*(width*4)), width*4);
+}
+
 
 void draw_rect(uint16_t x, uint16_t y, uint16_t x_size, uint16_t y_size, uint32_t colour){
 	if((x+x_size) >= x_res || (y+y_size) >= y_res){return;}

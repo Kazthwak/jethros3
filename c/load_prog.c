@@ -235,6 +235,7 @@ int load_program(char* name){
 		print_string("ERROR IN CREATING PAGE TRACKING VECTOR");
 		goto cleanup;
 	}
+	//ERROR IS OCCURING HERE SOMEWHERE
 	for(uint16_t i = 0; i < prog_header->num_program_head_ents; i++){
 		//chatgpt informs me that this is difficult to follow. I can't imagine this being a problem in the future?'
 		struct elf_program_ent elf_prog_head_ent = *(struct elf_program_ent*)(i*(prog_header->program_head_ent_size) + prog_header->program_header_off + header);
@@ -266,7 +267,7 @@ int load_program(char* name){
 				unmap_page(page_base);
 			}
 			if(alloc_and_map_page(page_base) == false){
-				print_string("OUT OF FREE PAGES FOR PROGRAM");
+				print_string("OUT OF FREE PAGES FOR PROGRAM"); // ERROR OCCURS HERE
 				goto cleanup;
 			}
 			//record at the odd location the physical address for swapping back in (when I implement that)
@@ -285,6 +286,7 @@ int load_program(char* name){
 			print_string("THROW SCREEN OUT OF WINDOW (File read error)");
 		}
 	}
+	print_string("GOT TO HERE2");hang();
 	//backup pages_used into a struct somewhere - currently it is just a memory leak
 	//setup stack
 	uint32_t prev_entries = pages_used->length;
@@ -394,6 +396,9 @@ int load_program(char* name){
 }
 
 int load_program_and_execute(char* name){
-	switch_to_task(load_program(name));
+	uint16_t tmp = load_program(name);
+	print_string("TASK LOADED\n");
+	hang();
+	switch_to_task(tmp);
 	return(1); //FIXTHIS
 }
